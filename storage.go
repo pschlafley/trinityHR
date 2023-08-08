@@ -12,6 +12,7 @@ type Storage interface {
 	DeleteEmployee(int) error
 	UpdateEmployee(*Employee) error
 	GetEmployeeByID(int) (*Employee, error)
+	GetAllEmployees() ([]*Employee, error)
 }
 
 type PostgresStore struct {
@@ -40,9 +41,9 @@ func (s *PostgresStore) createEmployeesTable() (string, error) {
 	query := `CREATE TABLE IF NOT EXISTS employees(
 		id serial NOT NULL PRIMARY KEY, 
 		fullName varchar(50) NOT NULL,
-		email varchar(50) NOT NULL, 
-		password varchar(50) NOT NULL,
-		create_at timestamp
+		email varchar(50) UNIQUE NOT NULL, 
+		password varchar(255) UNIQUE NOT NULL,
+		created_at timestamp
 	)`
 
 	_, err := s.db.Exec(query)
@@ -75,14 +76,13 @@ func NewPostgresStore() (*PostgresStore, error) {
 }
 
 func (s *PostgresStore) CreateEmployee(emp *Employee) error {
-	query := `INSERT INTO employees (fullName, email, password, create_at) VALUES ($1, $2, $3, $4)`
-	res, err := s.db.Query(query, emp.FullName, emp.Email, emp.Password, emp.CreatedAt)
+	query := `INSERT INTO employees (fullName, email, password, created_at) VALUES ($1, $2, $3, $4)`
+
+	_, err := s.db.Exec(query, emp.FullName, emp.Email, emp.Password, emp.CreatedAt)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("add employee error: %v", err)
 	}
-
-	fmt.Printf("%+v", res)
 
 	return nil
 }
@@ -90,9 +90,64 @@ func (s *PostgresStore) CreateEmployee(emp *Employee) error {
 func (s *PostgresStore) DeleteEmployee(id int) error {
 	return nil
 }
+
 func (s *PostgresStore) UpdateEmployee(*Employee) error {
 	return nil
 }
+
 func (s *PostgresStore) GetEmployeeByID(id int) (*Employee, error) {
-	return nil, nil
+	query := "select * from employees where id=$1"
+
+	res, err := s.db.Query(query, id)
+
+	if err != nil {
+		return nil, err
+	}
+	employees := []*Employee{}
+
+	for res.Next() {
+		var employee Employee
+		if err := res.Scan(
+			&employee.ID,
+			&employee.FullName,
+			&employee.Email,
+			&employee.Password,
+			&employee.CreatedAt); err != nil {
+			return nil, fmt.Errorf("error at getallemployees scan: %v", err)
+		}
+		employees = append(employees, &employee)
+	}
+
+	var employee = &Employee{}
+
+	for _, e := range employees {
+		employee = e
+	}
+
+	return employee, nil
+}
+
+func (s *PostgresStore) GetAllEmployees() ([]*Employee, error) {
+	queryResult, err := s.db.Query("select * from employees")
+
+	if err != nil {
+		return nil, err
+	}
+
+	employees := []*Employee{}
+
+	for queryResult.Next() {
+		var employee Employee
+		if err := queryResult.Scan(
+			&employee.ID,
+			&employee.FullName,
+			&employee.Email,
+			&employee.Password,
+			&employee.CreatedAt); err != nil {
+			return nil, fmt.Errorf("error at getallemployees scan: %v", err)
+		}
+		employees = append(employees, &employee)
+	}
+
+	return employees, nil
 }

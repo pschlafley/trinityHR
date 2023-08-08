@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type APIServer struct {
@@ -27,11 +29,13 @@ func (s *APIServer) Run() {
 	// MUX's HandleFunc takes a Path string and func(http.ResponseWriter, *http.Request) which is of the type HttpHandler from the net/http package
 	// our handleAccount func returns an error which means that it is not of the same type of function that mux's HandleFunc requires
 	// So we need to convert our handler func to HttpHandler type
-	router.HandleFunc("/employees", makeHTTPHandleFunc(s.handleEmployee))
+	router.HandleFunc("/", makeHTTPHandleFunc(s.handleEmployee))
 
 	router.HandleFunc("/employees/create", makeHTTPHandleFunc(s.handleCreateEmployee))
 
-	router.HandleFunc("/employees/{id}", makeHTTPHandleFunc(s.handleGetEmployee))
+	router.HandleFunc("/employees/{id}", makeHTTPHandleFunc(s.handleGetEmployeeById))
+
+	router.HandleFunc("/employees", makeHTTPHandleFunc(s.handleGetAllEmployees))
 
 	log.Printf("server running at http://localhost%v\n", s.listenAddr)
 
@@ -40,7 +44,7 @@ func (s *APIServer) Run() {
 
 func (s *APIServer) handleEmployee(w http.ResponseWriter, r *http.Request) error {
 	if r.Method == "GET" {
-		return s.handleGetEmployee(w, r)
+		return s.handleGetEmployeeById(w, r)
 	}
 
 	if r.Method == "POST" {
@@ -54,10 +58,32 @@ func (s *APIServer) handleEmployee(w http.ResponseWriter, r *http.Request) error
 	return fmt.Errorf("method not allowed %s", r.Method)
 }
 
-func (s *APIServer) handleGetEmployee(w http.ResponseWriter, r *http.Request) error {
-	id := mux.Vars(r)["id"]
-	fmt.Println("ID:", id)
-	return WriteJSON(w, http.StatusOK, &Employee{})
+func (s *APIServer) handleGetEmployeeById(w http.ResponseWriter, r *http.Request) error {
+	muxVarsId := mux.Vars(r)["id"]
+
+	id, err := strconv.Atoi(muxVarsId)
+
+	if err != nil {
+		return err
+	}
+
+	employee, getEmployeeErr := s.store.GetEmployeeByID(id)
+
+	if getEmployeeErr != nil {
+		return getEmployeeErr
+	}
+
+	return WriteJSON(w, http.StatusOK, employee)
+}
+
+func (s *APIServer) handleGetAllEmployees(w http.ResponseWriter, r *http.Request) error {
+	employees, err := s.store.GetAllEmployees()
+
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, employees)
 }
 
 func (s *APIServer) handleCreateEmployee(w http.ResponseWriter, r *http.Request) error {
@@ -67,7 +93,13 @@ func (s *APIServer) handleCreateEmployee(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
-	employee := NewEmployee(createEmployeeReq.FullName, createEmployeeReq.Email, createEmployeeReq.Password)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createEmployeeReq.Password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return fmt.Errorf("hashing password error: %v", err)
+	}
+
+	employee := NewEmployee(createEmployeeReq.FullName, createEmployeeReq.Email, string(hashedPassword))
 
 	if err := s.store.CreateEmployee(employee); err != nil {
 		return err
