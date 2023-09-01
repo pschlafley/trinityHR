@@ -21,7 +21,7 @@ type PostgresStore struct {
 }
 
 func (s *PostgresStore) DropTable() error {
-	query := `DROP TABLE employees`
+	query := `DROP TABLE accounts`
 
 	_, err := s.db.Exec(query)
 

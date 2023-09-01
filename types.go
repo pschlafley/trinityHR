@@ -15,15 +15,6 @@ type CreateAccountRequest struct {
 	Password string `json:"password"`
 }
 
-// type Admin struct {
-// 	ID          int       `json:"id"`
-// 	AccountType string    `json:"account_type"`
-// 	FullName    string    `json:"full_name"`
-// 	Email       string    `json:"email"`
-// 	Password    string    `json:"password"`
-// 	CreatedAt   time.Time `json:"created_at"`
-// }
-
 type Account struct {
 	ID          int       `json:"id"`
 	AccountType string    `json:"account_type"`
@@ -32,16 +23,6 @@ type Account struct {
 	Password    string    `json:"password"`
 	CreatedAt   time.Time `json:"created_at"`
 }
-
-// func (admin *Admin) NewAdmin(full_name, email, password string) *Admin {
-// 	return &Admin{
-// 		AccountType: AdminAccount,
-// 		FullName:    full_name,
-// 		Email:       email,
-// 		Password:    password,
-// 		CreatedAt:   time.Now().UTC(),
-// 	}
-// }
 
 func (employee *Account) NewAccount(reqURI, full_name, email, password string) *Account {
 	var account *Account
@@ -56,7 +37,7 @@ func (employee *Account) NewAccount(reqURI, full_name, email, password string) *
 		}
 	} else if reqURI == "/accounts/employees/create" {
 		account = &Account{
-			AccountType: AdminAccount,
+			AccountType: UserAccount,
 			FullName:    full_name,
 			Email:       email,
 			Password:    password,

@@ -77,7 +77,7 @@ func (s *APIServer) handleCreateAdmin(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	return nil
+	return WriteJSON(w, http.StatusOK, newAdmin)
 }
 
 func (s *APIServer) handleGetEmployeeById(w http.ResponseWriter, r *http.Request) error {
