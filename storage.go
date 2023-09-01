@@ -8,11 +8,12 @@ import (
 )
 
 type Storage interface {
-	CreateEmployee(*Employee) error
+	CreateAdmin(*Account) error
+	CreateEmployee(*Account) error
 	DeleteEmployee(int) error
-	UpdateEmployee(*Employee) error
-	GetEmployeeByID(int) (*Employee, error)
-	GetAllEmployees() ([]*Employee, error)
+	UpdateEmployee(*Account) error
+	GetEmployeeByID(int) (*Account, error)
+	GetAllAccounts() ([]*Account, error)
 }
 
 type PostgresStore struct {
@@ -34,13 +35,14 @@ func (s *PostgresStore) DropTable() error {
 }
 
 func (s *PostgresStore) Init() (string, error) {
-	return s.createEmployeesTable()
+	return s.createAccountsTable()
 }
 
-func (s *PostgresStore) createEmployeesTable() (string, error) {
-	query := `CREATE TABLE IF NOT EXISTS employees(
+func (s *PostgresStore) createAccountsTable() (string, error) {
+	query := `CREATE TABLE IF NOT EXISTS accounts(
 		id serial NOT NULL PRIMARY KEY, 
-		fullName varchar(50) NOT NULL,
+		account_type varchar(15) NOT NULL,
+		full_name varchar(50) NOT NULL,
 		email varchar(50) UNIQUE NOT NULL, 
 		password varchar(255) UNIQUE NOT NULL,
 		created_at timestamp
@@ -75,10 +77,10 @@ func NewPostgresStore() (*PostgresStore, error) {
 	return store, nil
 }
 
-func (s *PostgresStore) CreateEmployee(emp *Employee) error {
-	query := `INSERT INTO employees (fullName, email, password, created_at) VALUES ($1, $2, $3, $4)`
+func (s *PostgresStore) CreateEmployee(emp *Account) error {
+	query := `INSERT INTO accounts (account_type, full_name, email, password, created_at) VALUES ($1, $2, $3, $4, $5)`
 
-	_, err := s.db.Exec(query, emp.FullName, emp.Email, emp.Password, emp.CreatedAt)
+	_, err := s.db.Exec(query, emp.AccountType, emp.FullName, emp.Email, emp.Password, emp.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf("add employee error: %v", err)
@@ -87,67 +89,83 @@ func (s *PostgresStore) CreateEmployee(emp *Employee) error {
 	return nil
 }
 
+func (s *PostgresStore) CreateAdmin(admin *Account) error {
+	query := `INSERT INTO accounts (account_type, full_name, email, password, created_at) VALUES ($1, $2, $3, $4, $5)`
+
+	_, err := s.db.Exec(query, admin.AccountType, admin.FullName, admin.Email, admin.Password, admin.CreatedAt)
+
+	if err != nil {
+		return fmt.Errorf("add employee error: %v", err)
+	}
+
+	return nil
+
+}
+
 func (s *PostgresStore) DeleteEmployee(id int) error {
-	return nil
-}
+	query := `DELETE FROM accounts WHERE id=$1`
 
-func (s *PostgresStore) UpdateEmployee(*Employee) error {
-	return nil
-}
-
-func (s *PostgresStore) GetEmployeeByID(id int) (*Employee, error) {
-	query := "select * from employees where id=$1"
-
-	res, err := s.db.Query(query, id)
+	_, err := s.db.Query(query, id)
 
 	if err != nil {
-		return nil, err
-	}
-	employees := []*Employee{}
-
-	for res.Next() {
-		var employee Employee
-		if err := res.Scan(
-			&employee.ID,
-			&employee.FullName,
-			&employee.Email,
-			&employee.Password,
-			&employee.CreatedAt); err != nil {
-			return nil, fmt.Errorf("error at getallemployees scan: %v", err)
-		}
-		employees = append(employees, &employee)
+		return fmt.Errorf("unable to delete account with id of %d", id)
 	}
 
-	var employee = &Employee{}
-
-	for _, e := range employees {
-		employee = e
-	}
-
-	return employee, nil
+	return nil
 }
 
-func (s *PostgresStore) GetAllEmployees() ([]*Employee, error) {
-	queryResult, err := s.db.Query("select * from employees")
+func (s *PostgresStore) UpdateEmployee(*Account) error {
+	return nil
+}
+
+func (s *PostgresStore) GetEmployeeByID(id int) (*Account, error) {
+	query := "select * from accounts where id=$1"
+
+	rows, err := s.db.Query(query, id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	employees := []*Employee{}
+	for rows.Next() {
+		return scanIntoAccount(rows)
+	}
 
-	for queryResult.Next() {
-		var employee Employee
-		if err := queryResult.Scan(
-			&employee.ID,
-			&employee.FullName,
-			&employee.Email,
-			&employee.Password,
-			&employee.CreatedAt); err != nil {
-			return nil, fmt.Errorf("error at getallemployees scan: %v", err)
+	return nil, fmt.Errorf("account %d not found", id)
+
+}
+
+func (s *PostgresStore) GetAllAccounts() ([]*Account, error) {
+	rows, err := s.db.Query("select * from accounts")
+
+	if err != nil {
+		return nil, err
+	}
+	var employees []*Account
+
+	for rows.Next() {
+		employee, err := scanIntoAccount(rows)
+
+		if err != nil {
+			return nil, err
 		}
-		employees = append(employees, &employee)
+
+		employees = append(employees, employee)
 	}
 
 	return employees, nil
+}
+
+func scanIntoAccount(rows *sql.Rows) (*Account, error) {
+	employee := &Account{}
+
+	err := rows.Scan(
+		&employee.ID,
+		&employee.AccountType,
+		&employee.FullName,
+		&employee.Email,
+		&employee.Password,
+		&employee.CreatedAt)
+
+	return employee, err
 }
