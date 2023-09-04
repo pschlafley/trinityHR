@@ -32,13 +32,21 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/accounts/employees/create", makeHTTPHandleFunc(s.handleCreateEmployee))
 
-	router.HandleFunc("/accounts/employees/{id}", makeHTTPHandleFunc(s.handleGetEmployeeById))
+	router.HandleFunc("/accounts/{id}", makeHTTPHandleFunc(s.handleGetEmployeeById))
 
 	router.HandleFunc("/accounts", makeHTTPHandleFunc(s.handleGetAllAccounts))
 
 	router.HandleFunc("/accounts/employees/delete/{id}", makeHTTPHandleFunc(s.handleDeleteEmployee))
 
 	router.HandleFunc("/accounts/admins/create", makeHTTPHandleFunc(s.handleCreateAdmin))
+
+	router.HandleFunc("/accounts/super-admin/create", makeHTTPHandleFunc(s.handleCreateAdmin))
+
+	router.HandleFunc("/timeOff/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
+
+	router.HandleFunc("/timeOff", makeHTTPHandleFunc(s.handleGetTimeOffRequests))
+
+	// router.HandleFunc("/accounts/update", makeHTTPHandleFunc(s.handleUpdateAccount))
 
 	log.Printf("server running at http://localhost%v\n", s.listenAddr)
 
@@ -109,6 +117,7 @@ func (s *APIServer) handleCreateEmployee(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		return fmt.Errorf("hashing password error: %v", err)
 	}
+
 	var employee *Account
 
 	newEmployee := employee.NewAccount(reqURI, createEmployeeReq.FullName, createEmployeeReq.Email, string(hashedPassword))
@@ -134,6 +143,34 @@ func (s *APIServer) handleDeleteEmployee(w http.ResponseWriter, r *http.Request)
 	}
 
 	return WriteJSON(w, http.StatusOK, map[string]int{"deleted": id})
+}
+
+func (s *APIServer) handleCreateTimeOff(w http.ResponseWriter, r *http.Request) error {
+	timeOffRequest := &TimeOffRequest{}
+
+	if err := json.NewDecoder(r.Body).Decode(&timeOffRequest); err != nil {
+		return fmt.Errorf("error decoding timeOffRequest body: %v", err)
+	}
+
+	var timeOffReq *TimeOff
+
+	newTimeOffRequest := timeOffReq.NewTimeOffRequest(timeOffRequest.StartDate, timeOffRequest.EndDate, timeOffRequest.Type)
+
+	if err := s.store.CreateTimeOffRequest(newTimeOffRequest); err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, newTimeOffRequest)
+}
+
+func (s *APIServer) handleGetTimeOffRequests(w http.ResponseWriter, r *http.Request) error {
+	requests, err := s.store.GetTimeOffRequests()
+
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, requests)
 }
 
 // func that returns Encoded JSON data
