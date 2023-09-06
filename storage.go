@@ -15,6 +15,8 @@ type Storage interface {
 	GetAllAccounts() ([]*Account, error)
 	CreateTimeOffRequest(*TimeOff) error
 	GetTimeOffRequests() ([]*TimeOff, error)
+	CreateAccountsTimeOffRelationTableRow(*AccountsTimeOffRelationTable) error
+	GetAccountsTimeOffRelations() ([]*AccountTimeOffRelationData, error)
 }
 
 type PostgresStore struct {
@@ -22,7 +24,7 @@ type PostgresStore struct {
 }
 
 func (s *PostgresStore) DropTable() error {
-	dropAccountsTimeOffTable := `DROP TABLE IF EXISTS accountsTimeOff`
+	dropAccountsTimeOffTable := `DROP TABLE IF EXISTS accountsTimeOffRelation`
 	dropTimeOffTable := `DROP TABLE IF EXISTS timeOff`
 	dropAccountsTable := `DROP TABLE IF EXISTS accounts`
 
@@ -52,7 +54,7 @@ func (s *PostgresStore) Init() (string, error) {
 		return "", fmt.Errorf("TimeOffTableError: %v", timeOffTableError)
 	}
 
-	if accountsTimeOffTableError := s.createAccountsTimeOffTable(); accountsTimeOffTableError != nil {
+	if accountsTimeOffTableError := s.createAccountsTimeOffRelationTable(); accountsTimeOffTableError != nil {
 		return "", fmt.Errorf("AccountsTimeOffTableError: %v", accountsTimeOffTableError)
 	}
 
@@ -97,8 +99,8 @@ func (s *PostgresStore) createTimeOffTable() error {
 	return nil
 }
 
-func (s *PostgresStore) createAccountsTimeOffTable() error {
-	query := `CREATE TABLE IF NOT EXISTS accountsTimeOff(
+func (s *PostgresStore) createAccountsTimeOffRelationTable() error {
+	query := `CREATE TABLE IF NOT EXISTS accountsTimeOffRelation(
 		id serial NOT NULL PRIMARY KEY,
 		account_id int REFERENCES accounts(id),
 		time_off_id int REFERENCES timeOff(id)
@@ -169,6 +171,48 @@ func (s *PostgresStore) DeleteEmployee(id int) error {
 	return nil
 }
 
+func (s *PostgresStore) GetAllAccounts() ([]*Account, error) {
+	rows, err := s.db.Query("select * from accounts")
+
+	if err != nil {
+		return nil, fmt.Errorf("error fetching getAllAccounts: %d", err)
+	}
+
+	var accounts []*Account
+
+	for rows.Next() {
+		account, err := scanIntoAccount(rows)
+
+		if err != nil {
+			return nil, fmt.Errorf("error scanning into accounts: %d", err)
+		}
+
+		accounts = append(accounts, account)
+	}
+
+	if accounts == nil {
+		return nil, fmt.Errorf("%d accounts found", len(accounts))
+	}
+
+	return accounts, nil
+}
+
+func (s *PostgresStore) GetEmployeeByID(id int) (*Account, error) {
+	query := "select * from accounts where id=$1"
+
+	rows, err := s.db.Query(query, id)
+
+	if err != nil {
+		return nil, fmt.Errorf("error fetching getAccountById: %d", err)
+	}
+
+	for rows.Next() {
+		return scanIntoAccount(rows)
+	}
+
+	return nil, fmt.Errorf("account %d not found", id)
+}
+
 func (s *PostgresStore) CreateTimeOffRequest(req *TimeOff) error {
 	query := `INSERT INTO timeOff (type, start_date, end_date, created_at) VALUES ($1, $2, $3, $4)`
 
@@ -209,51 +253,48 @@ func (s *PostgresStore) GetTimeOffRequests() ([]*TimeOff, error) {
 	return requests, nil
 }
 
-func (s *PostgresStore) GetEmployeeByID(id int) (*Account, error) {
-	query := "select * from accounts where id=$1"
+func (s *PostgresStore) CreateAccountsTimeOffRelationTableRow(req *AccountsTimeOffRelationTable) error {
+	query := `INSERT INTO accountsTimeOffRelation (account_id, time_off_id) VALUES ($1, $2)`
 
-	rows, err := s.db.Query(query, id)
+	_, err := s.db.Exec(query, req.AccountID, req.TimeOffID)
 
 	if err != nil {
-		return nil, fmt.Errorf("error fetching getAccountById: %d", err)
+		return fmt.Errorf("error inserting into accounts_time_off_relation_table: %v", err)
 	}
 
-	for rows.Next() {
-		return scanIntoAccount(rows)
-	}
-
-	return nil, fmt.Errorf("account %d not found", id)
-
+	return nil
 }
 
-func (s *PostgresStore) GetAllAccounts() ([]*Account, error) {
-	rows, err := s.db.Query("select * from accounts")
+func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*AccountTimeOffRelationData, error) {
+	query := `SELECT full_name, type, start_date, end_date FROM accountsTimeOffRelation
+				JOIN accounts ON accountsTimeOffRelation.account_id = accounts.id
+				JOIN timeOff ON accountsTimeOffRelation.time_off_id = timeOff.id;`
+
+	rows, err := s.db.Query(query)
 
 	if err != nil {
-		return nil, fmt.Errorf("error fetching getAllAccounts: %d", err)
+		return nil, fmt.Errorf("error fetching from accounts time off relation table: %v", err)
 	}
 
-	var accounts []*Account
+	var accountsTimeOffRelationArr []*AccountTimeOffRelationData
 
 	for rows.Next() {
-		account, err := scanIntoAccount(rows)
+		req, err := scanIntoAccountsTimeOffRelationTable(rows)
 
 		if err != nil {
-			return nil, fmt.Errorf("error scanning into accounts: %d", err)
+			return nil, fmt.Errorf("error scanning from accounts time off relation table: %v", err)
 		}
 
-		accounts = append(accounts, account)
+		accountsTimeOffRelationArr = append(accountsTimeOffRelationArr, req)
 	}
 
-	if accounts == nil {
-		return nil, fmt.Errorf("%d accounts found", len(accounts))
-	}
+	fmt.Print(accountsTimeOffRelationArr)
 
-	return accounts, nil
+	return accountsTimeOffRelationArr, nil
 }
 
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
-	employee := &Account{}
+	employee := Account{}
 
 	err := rows.Scan(
 		&employee.AccountID,
@@ -263,11 +304,11 @@ func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 		&employee.Password,
 		&employee.CreatedAt)
 
-	return employee, err
+	return &employee, err
 }
 
 func scanIntoTimeOffTable(rows *sql.Rows) (*TimeOff, error) {
-	timeOff := &TimeOff{}
+	timeOff := TimeOff{}
 
 	err := rows.Scan(
 		&timeOff.TimeOffID,
@@ -277,5 +318,22 @@ func scanIntoTimeOffTable(rows *sql.Rows) (*TimeOff, error) {
 		&timeOff.CreatedAt,
 	)
 
-	return timeOff, err
+	return &timeOff, err
+}
+
+func scanIntoAccountsTimeOffRelationTable(rows *sql.Rows) (*AccountTimeOffRelationData, error) {
+	accountTimeOff := AccountTimeOffRelationData{}
+
+	err := rows.Scan(
+		&accountTimeOff.FullName,
+		&accountTimeOff.Type,
+		&accountTimeOff.StartDate,
+		&accountTimeOff.EndDate,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &accountTimeOff, nil
 }

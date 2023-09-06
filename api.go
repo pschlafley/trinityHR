@@ -42,11 +42,13 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/accounts/super-admin/create", makeHTTPHandleFunc(s.handleCreateAdmin))
 
-	router.HandleFunc("/timeOff/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
+	router.HandleFunc("/time-off/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
 
-	router.HandleFunc("/timeOff", makeHTTPHandleFunc(s.handleGetTimeOffRequests))
+	router.HandleFunc("/time-off", makeHTTPHandleFunc(s.handleGetTimeOffRequests))
 
-	// router.HandleFunc("/accounts/update", makeHTTPHandleFunc(s.handleUpdateAccount))
+	router.HandleFunc("/account-time-off-relation/create", makeHTTPHandleFunc(s.handleCreateAccountsTimeOffRelationTable))
+
+	router.HandleFunc("/account-time-off-relation", makeHTTPHandleFunc(s.handleGetAccountsTimeOffRelationTable))
 
 	log.Printf("server running at http://localhost%v\n", s.listenAddr)
 
@@ -61,6 +63,22 @@ func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request)
 	}
 
 	return WriteJSON(w, http.StatusOK, employees)
+}
+
+func (s *APIServer) handleGetEmployeeById(w http.ResponseWriter, r *http.Request) error {
+	id, err := getIdParam(r)
+
+	if err != nil {
+		return fmt.Errorf("invalid id given %d", id)
+	}
+
+	employee, getEmployeeErr := s.store.GetEmployeeByID(id)
+
+	if getEmployeeErr != nil {
+		return getEmployeeErr
+	}
+
+	return WriteJSON(w, http.StatusOK, employee)
 }
 
 func (s *APIServer) handleCreateAdmin(w http.ResponseWriter, r *http.Request) error {
@@ -86,22 +104,6 @@ func (s *APIServer) handleCreateAdmin(w http.ResponseWriter, r *http.Request) er
 	}
 
 	return WriteJSON(w, http.StatusOK, newAdmin)
-}
-
-func (s *APIServer) handleGetEmployeeById(w http.ResponseWriter, r *http.Request) error {
-	id, err := getIdParam(r)
-
-	if err != nil {
-		return fmt.Errorf("invalid id given %d", id)
-	}
-
-	employee, getEmployeeErr := s.store.GetEmployeeByID(id)
-
-	if getEmployeeErr != nil {
-		return getEmployeeErr
-	}
-
-	return WriteJSON(w, http.StatusOK, employee)
 }
 
 func (s *APIServer) handleCreateEmployee(w http.ResponseWriter, r *http.Request) error {
@@ -171,6 +173,36 @@ func (s *APIServer) handleGetTimeOffRequests(w http.ResponseWriter, r *http.Requ
 	}
 
 	return WriteJSON(w, http.StatusOK, requests)
+}
+
+func (s *APIServer) handleCreateAccountsTimeOffRelationTable(w http.ResponseWriter, r *http.Request) error {
+	accountTimeOffRelationRequest := &AccountsTimeOffRelationRequest{}
+
+	if decodeErr := json.NewDecoder(r.Body).Decode(accountTimeOffRelationRequest); decodeErr != nil {
+		return decodeErr
+	}
+
+	accountTimeOffRelationTable := &AccountsTimeOffRelationTable{}
+
+	request := accountTimeOffRelationTable.NewAccountsTimeOffRelationTable(accountTimeOffRelationRequest.AccountID, accountTimeOffRelationRequest.TimeOffID)
+
+	dbErr := s.store.CreateAccountsTimeOffRelationTableRow(request)
+
+	if dbErr != nil {
+		return dbErr
+	}
+
+	return WriteJSON(w, http.StatusOK, request)
+}
+
+func (s *APIServer) handleGetAccountsTimeOffRelationTable(w http.ResponseWriter, r *http.Request) error {
+	response, dbErr := s.store.GetAccountsTimeOffRelations()
+
+	if dbErr != nil {
+		return dbErr
+	}
+
+	return WriteJSON(w, http.StatusOK, response)
 }
 
 // func that returns Encoded JSON data
