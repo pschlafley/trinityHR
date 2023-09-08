@@ -83,7 +83,7 @@ func (s *APIServer) handleCreateEmployee(w http.ResponseWriter, r *http.Request)
 
 	var employee *types.Account
 
-	newEmployee := employee.NewAccount(accountID, reqURI, createEmployeeReq)
+	newEmployee := employee.NewAccount(accountID, reqURI, string(hashedPassword), createEmployeeReq)
 
 	return WriteJSON(w, http.StatusOK, newEmployee)
 }

@@ -30,7 +30,7 @@ func (s *PostgresStore) createAccountsTable() error {
 
 }
 func (s *PostgresStore) CreateEmployee(emp *types.CreateAccountRequest) (int, error) {
-	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
 	var accountId int
 
 	err := s.db.QueryRow(query, emp.AccountType, emp.Role, emp.FullName, emp.Email, emp.Password, time.Now().UTC(), emp.Department_id).Scan(&accountId)
@@ -43,9 +43,9 @@ func (s *PostgresStore) CreateEmployee(emp *types.CreateAccountRequest) (int, er
 }
 
 func (s *PostgresStore) CreateAdmin(admin *types.Account) error {
-	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at) VALUES ($1, $2, $3, $4, $5)`
+	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6)`
 
-	_, err := s.db.Exec(query, admin.AccountType, admin.Role, admin.FullName, admin.Email, admin.Password, admin.CreatedAt, admin.Department_id)
+	_, err := s.db.Exec(query, admin.AccountType, admin.Role, admin.FullName, admin.Email, admin.Password, time.Now().UTC(), admin.Department_id)
 
 	if err != nil {
 		return fmt.Errorf("add employee error: %v", err)

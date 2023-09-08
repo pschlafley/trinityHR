@@ -24,39 +24,39 @@ type Account struct {
 	Department_id int       `json:"department_id"`
 }
 
-func (*Account) NewAccount(id int, reqURI string, req *CreateAccountRequest) *Account {
+func (*Account) NewAccount(id int, reqURI, password string, req *CreateAccountRequest) *Account {
 	var account *Account
 
 	if reqURI == "/accounts/admins/create" {
 		account = &Account{
 			AccountID:     id,
-			AccountType:   AdminAccount,
+			AccountType:   req.AccountType,
 			Role:          req.Role,
 			FullName:      req.FullName,
 			Email:         req.Email,
-			Password:      req.Password,
+			Password:      password,
 			CreatedAt:     time.Now().UTC(),
 			Department_id: req.Department_id,
 		}
 	} else if reqURI == "/accounts/employees/create" {
 		account = &Account{
 			AccountID:     id,
-			AccountType:   UserAccount,
+			AccountType:   req.AccountType,
 			Role:          req.Role,
 			FullName:      req.FullName,
 			Email:         req.Email,
-			Password:      req.Password,
+			Password:      password,
 			CreatedAt:     time.Now().UTC(),
 			Department_id: req.Department_id,
 		}
 	} else if reqURI == "/accounts/super-admin/create" {
 		account = &Account{
 			AccountID:     id,
-			AccountType:   SuperAdminAccount,
+			AccountType:   req.AccountType,
 			Role:          req.Role,
 			FullName:      req.FullName,
 			Email:         req.Email,
-			Password:      req.Password,
+			Password:      password,
 			CreatedAt:     time.Now().UTC(),
 			Department_id: req.Department_id,
 		}

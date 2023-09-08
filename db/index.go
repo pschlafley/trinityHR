@@ -35,10 +35,6 @@ func (s *PostgresStore) DropTable() error {
 	dropTimeOffTable := `DROP TABLE IF EXISTS timeOff`
 	dropAccountsTable := `DROP TABLE IF EXISTS accounts`
 
-	if _, dropDepartmentsTableErr := s.db.Exec(dropDepartmentsTable); dropDepartmentsTableErr != nil {
-		return dropDepartmentsTableErr
-	}
-
 	if _, accountsTimeOffTableErr := s.db.Exec(dropAccountsTimeOffTable); accountsTimeOffTableErr != nil {
 		return accountsTimeOffTableErr
 	}
@@ -49,6 +45,10 @@ func (s *PostgresStore) DropTable() error {
 
 	if _, accountsTableErr := s.db.Exec(dropAccountsTable); accountsTableErr != nil {
 		return accountsTableErr
+	}
+
+	if _, dropDepartmentsTableErr := s.db.Exec(dropDepartmentsTable); dropDepartmentsTableErr != nil {
+		return dropDepartmentsTableErr
 	}
 
 	fmt.Print("dropped all 4 tables\n")
