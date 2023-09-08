@@ -2,10 +2,13 @@ package main
 
 import (
 	"log"
+
+	"github.com/pschlafley/trinityHR/api"
+	"github.com/pschlafley/trinityHR/db"
 )
 
 func main() {
-	store, err := NewPostgresStore()
+	store, err := db.NewPostgresStore()
 
 	if err != nil {
 		log.Fatal(err)
@@ -23,6 +26,6 @@ func main() {
 		log.Printf("%v\n", connStr)
 	}
 
-	server := NewAPIServer(":3000", store)
+	server := api.NewAPIServer(":3000", store)
 	server.Run()
 }
