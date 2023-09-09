@@ -3,19 +3,19 @@ package types
 import "time"
 
 type Departments struct {
-	Id        int       `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"create_at"`
+	DepartmentID   int       `json:"department_id"`
+	DepartmentName string    `json:"department_name"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type CreateDepartmentRequest struct {
-	Name string `json:"name"`
+	DepartmentName string `json:"department_name"`
 }
 
 func (*Departments) NewDepartment(req *CreateDepartmentRequest, id int) *Departments {
 	return &Departments{
-		Id:        id,
-		Name:      req.Name,
-		CreatedAt: time.Now().UTC(),
+		DepartmentID:   id,
+		DepartmentName: req.DepartmentName,
+		CreatedAt:      time.Now().UTC(),
 	}
 }

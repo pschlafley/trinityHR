@@ -30,17 +30,13 @@ func (s *APIServer) Run() {
 	// our handleAccount func returns an error which means that it is not of the same type of function that mux's HandleFunc requires
 	// So we need to convert our handler func to HttpHandler type
 
-	router.HandleFunc("/accounts/employees/create", makeHTTPHandleFunc(s.handleCreateEmployee))
+	router.HandleFunc("/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
 
-	router.HandleFunc("/accounts/{id}", makeHTTPHandleFunc(s.handleGetEmployeeById))
+	router.HandleFunc("/accounts/{id}", makeHTTPHandleFunc(s.handleGetAccountById))
 
 	router.HandleFunc("/accounts", makeHTTPHandleFunc(s.handleGetAllAccounts))
 
-	router.HandleFunc("/accounts/employees/delete/{id}", makeHTTPHandleFunc(s.handleDeleteEmployee))
-
-	// router.HandleFunc("/accounts/admins/create", makeHTTPHandleFunc(s.handleCreateAdmin))
-
-	// router.HandleFunc("/accounts/super-admin/create", makeHTTPHandleFunc(s.handleCreateAdmin))
+	router.HandleFunc("/accounts/delete/{id}", makeHTTPHandleFunc(s.handleDeleteAccount))
 
 	router.HandleFunc("/time-off/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
 
@@ -51,6 +47,8 @@ func (s *APIServer) Run() {
 	router.HandleFunc("/account-time-off-relation", makeHTTPHandleFunc(s.handleGetAccountsTimeOffRelationTable))
 
 	router.HandleFunc("/departments/create", makeHTTPHandleFunc(s.handleCreateDepartments))
+
+	router.HandleFunc("/departments", makeHTTPHandleFunc(s.handleGetDepartments))
 
 	log.Printf("server running at http://localhost%v\n", s.listenAddr)
 

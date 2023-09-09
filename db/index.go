@@ -13,16 +13,16 @@ import (
 )
 
 type Storage interface {
-	CreateAdmin(*types.Account) error
-	CreateEmployee(*types.CreateAccountRequest) (int, error)
-	DeleteEmployee(int) error
-	GetEmployeeByID(int) (*types.Account, error)
-	GetAllAccounts() ([]*types.Account, error)
-	CreateTimeOffRequest(*types.TimeOff) error
+	CreateAccount(*types.CreateAccountRequest) (int, error)
+	DeleteAccount(int) error
+	GetAccountByID(int) (*types.AccountsDepartmentsRelationData, error)
+	GetAllAccounts() ([]*types.AccountsDepartmentsRelationData, error)
+	CreateTimeOffRequest(*types.TimeOffRequest) (int, error)
 	GetTimeOffRequests() ([]*types.TimeOff, error)
-	CreateAccountsTimeOffRelationTableRow(*types.AccountsTimeOffRelationTable) error
+	CreateAccountsTimeOffRelationTableRow(*types.AccountsTimeOffRelationRequest) (int, error)
 	GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRelationQueryData, error)
 	CreateDepartment(*types.CreateDepartmentRequest) (int, error)
+	GetDepartments() ([]*types.Departments, error)
 }
 
 type PostgresStore struct {

@@ -3,13 +3,14 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/pschlafley/trinityHR/types"
 )
 
 func (s *PostgresStore) createTimeOffTable() error {
 	query := `CREATE TABLE IF NOT EXISTS timeOff(
-		id serial NOT NULL PRIMARY KEY,
+		time_off_id serial NOT NULL PRIMARY KEY,
 		type varchar(50) NOT NULL,
 		start_date varchar(50) NOT NULL,
 		end_date varchar(50) NOT NULL,
@@ -24,16 +25,18 @@ func (s *PostgresStore) createTimeOffTable() error {
 
 	return nil
 }
-func (s *PostgresStore) CreateTimeOffRequest(req *types.TimeOff) error {
-	query := `INSERT INTO timeOff (type, start_date, end_date, created_at) VALUES ($1, $2, $3, $4)`
+func (s *PostgresStore) CreateTimeOffRequest(req *types.TimeOffRequest) (int, error) {
+	query := `INSERT INTO timeOff (type, start_date, end_date, created_at) VALUES ($1, $2, $3, $4) RETURNING time_off_id`
 
-	_, err := s.db.Exec(query, req.Type, req.StartDate, req.EndDate, req.CreatedAt)
+	var timeOffID int
+
+	err := s.db.QueryRow(query, req.Type, req.StartDate, req.EndDate, time.Now().UTC()).Scan(&timeOffID)
 
 	if err != nil {
-		return fmt.Errorf("error inserting into timeOff table: %v", err)
+		return 0, fmt.Errorf("error inserting into timeOff table: %v", err)
 	}
 
-	return nil
+	return timeOffID, nil
 }
 
 func (s *PostgresStore) GetTimeOffRequests() ([]*types.TimeOff, error) {

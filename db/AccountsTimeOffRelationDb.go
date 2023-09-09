@@ -9,9 +9,9 @@ import (
 
 func (s *PostgresStore) createAccountsTimeOffRelationTable() error {
 	query := `CREATE TABLE IF NOT EXISTS accountsTimeOffRelation(
-		id serial NOT NULL PRIMARY KEY,
-		account_id int REFERENCES accounts(id),
-		time_off_id int REFERENCES timeOff(id)
+		accountsTimeOffRelation_id serial NOT NULL PRIMARY KEY,
+		account_id int REFERENCES accounts(account_id),
+		time_off_id int REFERENCES timeOff(time_off_id)
 	)`
 
 	_, err := s.db.Exec(query)
@@ -23,22 +23,24 @@ func (s *PostgresStore) createAccountsTimeOffRelationTable() error {
 	return nil
 }
 
-func (s *PostgresStore) CreateAccountsTimeOffRelationTableRow(req *types.AccountsTimeOffRelationTable) error {
-	query := `INSERT INTO accountsTimeOffRelation (account_id, time_off_id) VALUES ($1, $2)`
+func (s *PostgresStore) CreateAccountsTimeOffRelationTableRow(req *types.AccountsTimeOffRelationRequest) (int, error) {
+	query := `INSERT INTO accountsTimeOffRelation (account_id, time_off_id) VALUES ($1, $2) RETURNING accountsTimeOffRelation_id`
 
-	_, err := s.db.Exec(query, req.AccountID, req.TimeOffID)
+	var id int
+
+	err := s.db.QueryRow(query, req.AccountID, req.TimeOffID).Scan(&id)
 
 	if err != nil {
-		return fmt.Errorf("error inserting into accounts_time_off_relation_table: %v", err)
+		return 0, fmt.Errorf("error inserting into accounts_time_off_relation_table: %v", err)
 	}
 
-	return nil
+	return id, nil
 }
 
 func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRelationQueryData, error) {
 	query := `SELECT full_name, email, type, start_date, end_date FROM accountsTimeOffRelation
-				JOIN accounts ON accountsTimeOffRelation.account_id = accounts.id
-				JOIN timeOff ON accountsTimeOffRelation.time_off_id = timeOff.id;`
+				JOIN accounts ON accountsTimeOffRelation.account_id = accounts.account_id
+				JOIN timeOff ON accountsTimeOffRelation.time_off_id = timeOff.time_off_id;`
 
 	rows, err := s.db.Query(query)
 
@@ -57,8 +59,6 @@ func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRe
 
 		accountsTimeOffRelationArr = append(accountsTimeOffRelationArr, req)
 	}
-
-	fmt.Print(accountsTimeOffRelationArr)
 
 	return accountsTimeOffRelationArr, nil
 }

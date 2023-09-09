@@ -25,3 +25,13 @@ func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Reque
 
 	return WriteJSON(w, http.StatusOK, newDepartment)
 }
+
+func (s *APIServer) handleGetDepartments(w http.ResponseWriter, r *http.Request) error {
+	departments, err := s.store.GetDepartments()
+
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, departments)
+}

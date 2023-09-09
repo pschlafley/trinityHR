@@ -5,8 +5,8 @@ import (
 )
 
 type CreateAccountRequest struct {
-	Role          string `json:"role"`
 	AccountType   string `json:"account_type"`
+	Role          string `json:"role"`
 	FullName      string `json:"full_name"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
@@ -24,43 +24,25 @@ type Account struct {
 	Department_id int       `json:"department_id"`
 }
 
-func (*Account) NewAccount(id int, reqURI, password string, req *CreateAccountRequest) *Account {
-	var account *Account
+type AccountsDepartmentsRelationData struct {
+	AccountID      int    `json:"account_id"`
+	AccountType    string `json:"account_type"`
+	Role           string `json:"role"`
+	FullName       string `json:"full_name"`
+	Email          string `json:"email"`
+	DepartmentID   int    `json:"department_id"`
+	DepartmentName string `json:"department_name"`
+}
 
-	if reqURI == "/accounts/admins/create" {
-		account = &Account{
-			AccountID:     id,
-			AccountType:   req.AccountType,
-			Role:          req.Role,
-			FullName:      req.FullName,
-			Email:         req.Email,
-			Password:      password,
-			CreatedAt:     time.Now().UTC(),
-			Department_id: req.Department_id,
-		}
-	} else if reqURI == "/accounts/employees/create" {
-		account = &Account{
-			AccountID:     id,
-			AccountType:   req.AccountType,
-			Role:          req.Role,
-			FullName:      req.FullName,
-			Email:         req.Email,
-			Password:      password,
-			CreatedAt:     time.Now().UTC(),
-			Department_id: req.Department_id,
-		}
-	} else if reqURI == "/accounts/super-admin/create" {
-		account = &Account{
-			AccountID:     id,
-			AccountType:   req.AccountType,
-			Role:          req.Role,
-			FullName:      req.FullName,
-			Email:         req.Email,
-			Password:      password,
-			CreatedAt:     time.Now().UTC(),
-			Department_id: req.Department_id,
-		}
+func (*Account) NewAccount(id int, password string, req *CreateAccountRequest) *Account {
+	return &Account{
+		AccountID:     id,
+		AccountType:   req.AccountType,
+		Role:          req.Role,
+		FullName:      req.FullName,
+		Email:         req.Email,
+		Password:      password,
+		CreatedAt:     time.Now().UTC(),
+		Department_id: req.Department_id,
 	}
-
-	return account
 }

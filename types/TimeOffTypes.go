@@ -16,11 +16,12 @@ type TimeOff struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (*TimeOff) NewTimeOffRequest(start_date, end_date, time_off_type string) *TimeOff {
+func (*TimeOff) NewTimeOffRequest(timeOffID int, request TimeOffRequest) *TimeOff {
 	return &TimeOff{
-		Type:      time_off_type,
-		StartDate: start_date,
-		EndDate:   end_date,
+		TimeOffID: timeOffID,
+		Type:      request.Type,
+		StartDate: request.StartDate,
+		EndDate:   request.EndDate,
 		CreatedAt: time.Now().UTC(),
 	}
 }

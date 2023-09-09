@@ -10,14 +10,14 @@ import (
 
 func (s *PostgresStore) createAccountsTable() error {
 	query := `CREATE TABLE IF NOT EXISTS accounts(
-		id serial NOT NULL PRIMARY KEY, 
+		account_id serial NOT NULL PRIMARY KEY, 
 		account_type varchar(50) NOT NULL,
 		role varchar(100),
 		full_name varchar(50) NOT NULL,
 		email varchar(50) UNIQUE NOT NULL, 
 		password varchar(100) UNIQUE NOT NULL,
 		created_at timestamp,
-		department_id int REFERENCES departments(id)
+		department_id int REFERENCES departments(department_id)
 	)`
 
 	_, err := s.db.Exec(query)
@@ -29,8 +29,9 @@ func (s *PostgresStore) createAccountsTable() error {
 	return nil
 
 }
-func (s *PostgresStore) CreateEmployee(emp *types.CreateAccountRequest) (int, error) {
-	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
+
+func (s *PostgresStore) CreateAccount(emp *types.CreateAccountRequest) (int, error) {
+	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING account_id`
 	var accountId int
 
 	err := s.db.QueryRow(query, emp.AccountType, emp.Role, emp.FullName, emp.Email, emp.Password, time.Now().UTC(), emp.Department_id).Scan(&accountId)
@@ -42,39 +43,28 @@ func (s *PostgresStore) CreateEmployee(emp *types.CreateAccountRequest) (int, er
 	return accountId, nil
 }
 
-func (s *PostgresStore) CreateAdmin(admin *types.Account) error {
-	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6)`
-
-	_, err := s.db.Exec(query, admin.AccountType, admin.Role, admin.FullName, admin.Email, admin.Password, time.Now().UTC(), admin.Department_id)
-
-	if err != nil {
-		return fmt.Errorf("add employee error: %v", err)
-	}
-
-	return nil
-
-}
-
-func (s *PostgresStore) DeleteEmployee(id int) error {
-	query := `DELETE FROM accounts WHERE id=$1`
+func (s *PostgresStore) DeleteAccount(id int) error {
+	query := `DELETE FROM accounts WHERE account_id=$1`
 
 	_, err := s.db.Query(query, id)
 
 	if err != nil {
-		return fmt.Errorf("unable to delete account with id of %d", id)
+		return fmt.Errorf("(%v) unable to delete account with id of %d", err, id)
 	}
 
 	return nil
 }
 
-func (s *PostgresStore) GetAllAccounts() ([]*types.Account, error) {
-	rows, err := s.db.Query("select * from accounts")
+func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationData, error) {
+	query := `SELECT account_id, account_type, role, full_name, email, accounts.department_id, department_name FROM accounts JOIN departments on accounts.department_id = departments.department_id ORDER BY account_id ASC`
+
+	rows, err := s.db.Query(query)
 
 	if err != nil {
 		return nil, fmt.Errorf("error fetching getAllAccounts: %d", err)
 	}
 
-	var accounts []*types.Account
+	var accounts []*types.AccountsDepartmentsRelationData
 
 	for rows.Next() {
 		account, err := scanIntoAccount(rows)
@@ -93,8 +83,8 @@ func (s *PostgresStore) GetAllAccounts() ([]*types.Account, error) {
 	return accounts, nil
 }
 
-func (s *PostgresStore) GetEmployeeByID(id int) (*types.Account, error) {
-	query := "select * from accounts where id=$1"
+func (s *PostgresStore) GetAccountByID(id int) (*types.AccountsDepartmentsRelationData, error) {
+	query := "SELECT account_id, account_type, role, full_name, email, accounts.department_id, department_name FROM accounts JOIN departments on accounts.department_id = departments.department_id WHERE account_id=$1"
 
 	rows, err := s.db.Query(query, id)
 
@@ -108,18 +98,17 @@ func (s *PostgresStore) GetEmployeeByID(id int) (*types.Account, error) {
 
 	return nil, fmt.Errorf("account %d not found", id)
 }
-func scanIntoAccount(rows *sql.Rows) (*types.Account, error) {
-	employee := types.Account{}
+func scanIntoAccount(rows *sql.Rows) (*types.AccountsDepartmentsRelationData, error) {
+	employee := types.AccountsDepartmentsRelationData{}
 
 	err := rows.Scan(
 		&employee.AccountID,
-		&employee.Role,
 		&employee.AccountType,
+		&employee.Role,
 		&employee.FullName,
 		&employee.Email,
-		&employee.Password,
-		&employee.CreatedAt,
-		&employee.Department_id,
+		&employee.DepartmentID,
+		&employee.DepartmentName,
 	)
 
 	return &employee, err

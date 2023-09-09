@@ -15,13 +15,15 @@ func (s *APIServer) handleCreateTimeOff(w http.ResponseWriter, r *http.Request) 
 		return fmt.Errorf("error decoding timeOffRequest body: %v", err)
 	}
 
-	var timeOffReq *types.TimeOff
+	timeOffID, err := s.store.CreateTimeOffRequest(timeOffRequest)
 
-	newTimeOffRequest := timeOffReq.NewTimeOffRequest(timeOffRequest.StartDate, timeOffRequest.EndDate, timeOffRequest.Type)
-
-	if err := s.store.CreateTimeOffRequest(newTimeOffRequest); err != nil {
+	if err != nil {
 		return err
 	}
+
+	var timeOffReq *types.TimeOff
+
+	newTimeOffRequest := timeOffReq.NewTimeOffRequest(timeOffID, *timeOffRequest)
 
 	return WriteJSON(w, http.StatusOK, newTimeOffRequest)
 }

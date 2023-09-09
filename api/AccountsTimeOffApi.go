@@ -14,15 +14,15 @@ func (s *APIServer) handleCreateAccountsTimeOffRelationTable(w http.ResponseWrit
 		return decodeErr
 	}
 
-	accountTimeOffRelationTable := &types.AccountsTimeOffRelationTable{}
-
-	request := accountTimeOffRelationTable.NewAccountsTimeOffRelationTable(accountTimeOffRelationRequest.AccountID, accountTimeOffRelationRequest.TimeOffID)
-
-	dbErr := s.store.CreateAccountsTimeOffRelationTableRow(request)
+	id, dbErr := s.store.CreateAccountsTimeOffRelationTableRow(accountTimeOffRelationRequest)
 
 	if dbErr != nil {
 		return dbErr
 	}
+
+	accountTimeOffRelationTable := &types.AccountsTimeOffRelationTable{}
+
+	request := accountTimeOffRelationTable.NewAccountsTimeOffRelationTable(id, accountTimeOffRelationRequest.AccountID, accountTimeOffRelationRequest.TimeOffID)
 
 	return WriteJSON(w, http.StatusOK, request)
 }
