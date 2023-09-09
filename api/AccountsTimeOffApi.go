@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *APIServer) handleCreateAccountsTimeOffRelationTable(w http.ResponseWriter, r *http.Request) error {
-	accountTimeOffRelationRequest := &types.AccountsTimeOffRelationRequest{}
+	accountTimeOffRelationRequest := &DbTypes.AccountsTimeOffRelationRequest{}
 
 	if decodeErr := json.NewDecoder(r.Body).Decode(accountTimeOffRelationRequest); decodeErr != nil {
 		return decodeErr
@@ -20,7 +20,7 @@ func (s *APIServer) handleCreateAccountsTimeOffRelationTable(w http.ResponseWrit
 		return dbErr
 	}
 
-	accountTimeOffRelationTable := &types.AccountsTimeOffRelationTable{}
+	accountTimeOffRelationTable := &DbTypes.AccountsTimeOffRelationTable{}
 
 	request := accountTimeOffRelationTable.NewAccountsTimeOffRelationTable(id, accountTimeOffRelationRequest.AccountID, accountTimeOffRelationRequest.TimeOffID)
 

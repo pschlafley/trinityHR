@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *PostgresStore) createTimeOffTable() error {
@@ -25,7 +25,7 @@ func (s *PostgresStore) createTimeOffTable() error {
 
 	return nil
 }
-func (s *PostgresStore) CreateTimeOffRequest(req *types.TimeOffRequest) (int, error) {
+func (s *PostgresStore) CreateTimeOffRequest(req *DbTypes.TimeOffRequest) (int, error) {
 	query := `INSERT INTO timeOff (type, start_date, end_date, created_at) VALUES ($1, $2, $3, $4) RETURNING time_off_id`
 
 	var timeOffID int
@@ -39,7 +39,7 @@ func (s *PostgresStore) CreateTimeOffRequest(req *types.TimeOffRequest) (int, er
 	return timeOffID, nil
 }
 
-func (s *PostgresStore) GetTimeOffRequests() ([]*types.TimeOff, error) {
+func (s *PostgresStore) GetTimeOffRequests() ([]*DbTypes.TimeOff, error) {
 	query := `SELECT * FROM timeOff`
 
 	rows, err := s.db.Query(query)
@@ -48,7 +48,7 @@ func (s *PostgresStore) GetTimeOffRequests() ([]*types.TimeOff, error) {
 		return nil, fmt.Errorf("error fetching from timeOff table: %v", err)
 	}
 
-	var requests []*types.TimeOff
+	var requests []*DbTypes.TimeOff
 
 	for rows.Next() {
 
@@ -66,8 +66,8 @@ func (s *PostgresStore) GetTimeOffRequests() ([]*types.TimeOff, error) {
 
 	return requests, nil
 }
-func scanIntoTimeOffTable(rows *sql.Rows) (*types.TimeOff, error) {
-	timeOff := types.TimeOff{}
+func scanIntoTimeOffTable(rows *sql.Rows) (*DbTypes.TimeOff, error) {
+	timeOff := DbTypes.TimeOff{}
 
 	err := rows.Scan(
 		&timeOff.TimeOffID,

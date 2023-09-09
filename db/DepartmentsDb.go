@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *PostgresStore) createDepartmentsTable() error {
@@ -24,7 +24,7 @@ func (s *PostgresStore) createDepartmentsTable() error {
 	return nil
 }
 
-func (s *PostgresStore) CreateDepartment(req *types.CreateDepartmentRequest) (int, error) {
+func (s *PostgresStore) CreateDepartment(req *DbTypes.CreateDepartmentRequest) (int, error) {
 	query := `INSERT INTO departments (department_name, created_at) VALUES ($1, $2) RETURNING department_id`
 	var deptID int
 
@@ -37,7 +37,7 @@ func (s *PostgresStore) CreateDepartment(req *types.CreateDepartmentRequest) (in
 	return deptID, nil
 }
 
-func (s *PostgresStore) GetDepartments() ([]*types.Departments, error) {
+func (s *PostgresStore) GetDepartments() ([]*DbTypes.Departments, error) {
 	query := `SELECT * FROM departments`
 
 	rows, err := s.db.Query(query)
@@ -46,7 +46,7 @@ func (s *PostgresStore) GetDepartments() ([]*types.Departments, error) {
 		return nil, fmt.Errorf("error querying all departments: %v", err)
 	}
 
-	var departments []*types.Departments
+	var departments []*DbTypes.Departments
 
 	for rows.Next() {
 		department, err := scanIntoDepartments(rows)
@@ -61,8 +61,8 @@ func (s *PostgresStore) GetDepartments() ([]*types.Departments, error) {
 	return departments, nil
 }
 
-func scanIntoDepartments(rows *sql.Rows) (*types.Departments, error) {
-	var departments types.Departments
+func scanIntoDepartments(rows *sql.Rows) (*DbTypes.Departments, error) {
+	var departments DbTypes.Departments
 
 	err := rows.Scan(
 		&departments.DepartmentID,

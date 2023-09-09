@@ -1,4 +1,4 @@
-package types
+package DbTypes
 
 type AccountsTimeOffRelationRequest struct {
 	AccountsTimeOffRelationID int `json:"accounts_timeOff_relation_id"`

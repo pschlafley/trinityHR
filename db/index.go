@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 
 	"github.com/gofor-little/env"
 
@@ -13,16 +13,16 @@ import (
 )
 
 type Storage interface {
-	CreateAccount(*types.CreateAccountRequest) (int, error)
+	CreateAccount(*DbTypes.CreateAccountRequest) (int, error)
 	DeleteAccount(int) error
-	GetAccountByID(int) (*types.AccountsDepartmentsRelationData, error)
-	GetAllAccounts() ([]*types.AccountsDepartmentsRelationData, error)
-	CreateTimeOffRequest(*types.TimeOffRequest) (int, error)
-	GetTimeOffRequests() ([]*types.TimeOff, error)
-	CreateAccountsTimeOffRelationTableRow(*types.AccountsTimeOffRelationRequest) (int, error)
-	GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRelationQueryData, error)
-	CreateDepartment(*types.CreateDepartmentRequest) (int, error)
-	GetDepartments() ([]*types.Departments, error)
+	GetAccountByID(int) (*DbTypes.AccountsDepartmentsRelationData, error)
+	GetAllAccounts() ([]*DbTypes.AccountsDepartmentsRelationData, error)
+	CreateTimeOffRequest(*DbTypes.TimeOffRequest) (int, error)
+	GetTimeOffRequests() ([]*DbTypes.TimeOff, error)
+	CreateAccountsTimeOffRelationTableRow(*DbTypes.AccountsTimeOffRelationRequest) (int, error)
+	GetAccountsTimeOffRelations() ([]*DbTypes.AccountTimeOffRelationQueryData, error)
+	CreateDepartment(*DbTypes.CreateDepartmentRequest) (int, error)
+	GetDepartments() ([]*DbTypes.Departments, error)
 }
 
 type PostgresStore struct {

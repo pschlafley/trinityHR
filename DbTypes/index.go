@@ -1,4 +1,4 @@
-package types
+package DbTypes
 
 const (
 	SuperAdminAccount string = "super_admin"

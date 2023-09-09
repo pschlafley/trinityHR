@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Request) error {
-	var request *types.CreateDepartmentRequest
-	var dept *types.Departments
+	var request *DbTypes.CreateDepartmentRequest
+	var dept *DbTypes.Departments
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return err

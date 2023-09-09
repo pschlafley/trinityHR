@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *PostgresStore) createAccountsTable() error {
@@ -30,7 +30,7 @@ func (s *PostgresStore) createAccountsTable() error {
 
 }
 
-func (s *PostgresStore) CreateAccount(emp *types.CreateAccountRequest) (int, error) {
+func (s *PostgresStore) CreateAccount(emp *DbTypes.CreateAccountRequest) (int, error) {
 	query := `INSERT INTO accounts (account_type, role, full_name, email, password, created_at, department_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING account_id`
 	var accountId int
 
@@ -55,7 +55,7 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 	return nil
 }
 
-func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationData, error) {
+func (s *PostgresStore) GetAllAccounts() ([]*DbTypes.AccountsDepartmentsRelationData, error) {
 	query := `SELECT account_id, account_type, role, full_name, email, accounts.department_id, department_name FROM accounts JOIN departments on accounts.department_id = departments.department_id ORDER BY account_id ASC`
 
 	rows, err := s.db.Query(query)
@@ -64,7 +64,7 @@ func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationDa
 		return nil, fmt.Errorf("error fetching getAllAccounts: %d", err)
 	}
 
-	var accounts []*types.AccountsDepartmentsRelationData
+	var accounts []*DbTypes.AccountsDepartmentsRelationData
 
 	for rows.Next() {
 		account, err := scanIntoAccount(rows)
@@ -83,7 +83,7 @@ func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationDa
 	return accounts, nil
 }
 
-func (s *PostgresStore) GetAccountByID(id int) (*types.AccountsDepartmentsRelationData, error) {
+func (s *PostgresStore) GetAccountByID(id int) (*DbTypes.AccountsDepartmentsRelationData, error) {
 	query := "SELECT account_id, account_type, role, full_name, email, accounts.department_id, department_name FROM accounts JOIN departments on accounts.department_id = departments.department_id WHERE account_id=$1"
 
 	rows, err := s.db.Query(query, id)
@@ -98,8 +98,8 @@ func (s *PostgresStore) GetAccountByID(id int) (*types.AccountsDepartmentsRelati
 
 	return nil, fmt.Errorf("account %d not found", id)
 }
-func scanIntoAccount(rows *sql.Rows) (*types.AccountsDepartmentsRelationData, error) {
-	employee := types.AccountsDepartmentsRelationData{}
+func scanIntoAccount(rows *sql.Rows) (*DbTypes.AccountsDepartmentsRelationData, error) {
+	employee := DbTypes.AccountsDepartmentsRelationData{}
 
 	err := rows.Scan(
 		&employee.AccountID,

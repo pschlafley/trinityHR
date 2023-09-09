@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -36,7 +36,7 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
-	var createEmployeeReq *types.CreateAccountRequest
+	var createEmployeeReq *DbTypes.CreateAccountRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&createEmployeeReq); err != nil {
 		return err
@@ -54,7 +54,7 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	var employee *types.Account
+	var employee *DbTypes.Account
 
 	newEmployee := employee.NewAccount(accountID, string(hashedPassword), createEmployeeReq)
 

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *APIServer) handleCreateTimeOff(w http.ResponseWriter, r *http.Request) error {
-	timeOffRequest := &types.TimeOffRequest{}
+	timeOffRequest := &DbTypes.TimeOffRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(&timeOffRequest); err != nil {
 		return fmt.Errorf("error decoding timeOffRequest body: %v", err)
@@ -21,7 +21,7 @@ func (s *APIServer) handleCreateTimeOff(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	var timeOffReq *types.TimeOff
+	var timeOffReq *DbTypes.TimeOff
 
 	newTimeOffRequest := timeOffReq.NewTimeOffRequest(timeOffID, *timeOffRequest)
 

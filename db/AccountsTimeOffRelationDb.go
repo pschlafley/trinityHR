@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pschlafley/trinityHR/types"
+	"github.com/pschlafley/trinityHR/DbTypes"
 )
 
 func (s *PostgresStore) createAccountsTimeOffRelationTable() error {
@@ -23,7 +23,7 @@ func (s *PostgresStore) createAccountsTimeOffRelationTable() error {
 	return nil
 }
 
-func (s *PostgresStore) CreateAccountsTimeOffRelationTableRow(req *types.AccountsTimeOffRelationRequest) (int, error) {
+func (s *PostgresStore) CreateAccountsTimeOffRelationTableRow(req *DbTypes.AccountsTimeOffRelationRequest) (int, error) {
 	query := `INSERT INTO accountsTimeOffRelation (account_id, time_off_id) VALUES ($1, $2) RETURNING accountsTimeOffRelation_id`
 
 	var id int
@@ -37,7 +37,7 @@ func (s *PostgresStore) CreateAccountsTimeOffRelationTableRow(req *types.Account
 	return id, nil
 }
 
-func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRelationQueryData, error) {
+func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*DbTypes.AccountTimeOffRelationQueryData, error) {
 	query := `SELECT full_name, email, type, start_date, end_date FROM accountsTimeOffRelation
 				JOIN accounts ON accountsTimeOffRelation.account_id = accounts.account_id
 				JOIN timeOff ON accountsTimeOffRelation.time_off_id = timeOff.time_off_id;`
@@ -48,7 +48,7 @@ func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRe
 		return nil, fmt.Errorf("error fetching from accounts time off relation table: %v", err)
 	}
 
-	var accountsTimeOffRelationArr []*types.AccountTimeOffRelationQueryData
+	var accountsTimeOffRelationArr []*DbTypes.AccountTimeOffRelationQueryData
 
 	for rows.Next() {
 		req, err := scanIntoAccountsTimeOffRelationTable(rows)
@@ -63,8 +63,8 @@ func (s *PostgresStore) GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRe
 	return accountsTimeOffRelationArr, nil
 }
 
-func scanIntoAccountsTimeOffRelationTable(rows *sql.Rows) (*types.AccountTimeOffRelationQueryData, error) {
-	accountTimeOff := types.AccountTimeOffRelationQueryData{}
+func scanIntoAccountsTimeOffRelationTable(rows *sql.Rows) (*DbTypes.AccountTimeOffRelationQueryData, error) {
+	accountTimeOff := DbTypes.AccountTimeOffRelationQueryData{}
 
 	err := rows.Scan(
 		&accountTimeOff.FullName,
