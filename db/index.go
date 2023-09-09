@@ -77,7 +77,7 @@ func (s *PostgresStore) Init() (string, error) {
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
-	if err := env.Load("/Users/peyton.schlafley/Code/trinityHR/.env"); err != nil {
+	if err := env.Load(".env"); err != nil {
 		log.Fatal(err)
 	}
 
