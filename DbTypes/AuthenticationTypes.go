@@ -12,21 +12,19 @@ type AuthenticationToken struct {
 }
 
 type MyCustomClaims struct {
-	Secret           string               `json:"secret"`
 	RegisteredClaims jwt.RegisteredClaims `json:"registered_claims"`
 }
 
 func (s *AuthenticationToken) NewAuthenticationToken() (string, error) {
-	secret, err := randutil.ASCII(25)
+	secret, err := randutil.ASCII(20)
 
-	mySigningKey := []byte("ALL YOUR BASE")
+	mySigningKey := []byte(string(secret))
 
 	if err != nil {
 		return "", err
 	}
 
 	claims := MyCustomClaims{
-		Secret: secret,
 		RegisteredClaims: jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
@@ -35,13 +33,18 @@ func (s *AuthenticationToken) NewAuthenticationToken() (string, error) {
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims.RegisteredClaims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims.RegisteredClaims)
 
-	ss, ssErr := token.SignedString(mySigningKey)
+	myToken, err := token.SignedString(mySigningKey)
 
-	if ssErr != nil {
-		return "", ssErr
+	if err != nil {
+		return "", err
 	}
 
-	return ss, nil
+	return myToken, nil
+}
+
+func ValidateToken(token jwt.Token) error {
+
+	return nil
 }
