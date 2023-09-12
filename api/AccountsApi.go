@@ -4,19 +4,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"text/template"
 
 	"github.com/pschlafley/trinityHR/types"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request) error {
+	tmpl := template.Must(template.ParseFiles("views/accounts.html"))
+
 	employees, err := s.store.GetAllAccounts()
 
 	if err != nil {
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, employees)
+	return tmpl.ExecuteTemplate(w, "test", employees)
+	// return tmpl.Execute(w, employees)
+
+	// return WriteJSON(w, http.StatusOK, employees)
 }
 
 func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request) error {

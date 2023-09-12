@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>TrinityHR</title>
+	</head>
+	<body>
+		<div>
+			<div class="text-center">
+				<h1 class="text-4xl">Accounts</h1>
+				<div id="response-div" class="flex text-left"></div>
+			</div>
+			<button
+				class="rounded-full bg-indigo-500 text-white p-3 hover:bg-sky-500 ease-in duration-200"
+				hx-get="/api/accounts"
+				hx-trigger="click"
+				hx-target="#response-div"
+			>
+				Get Accounts
+			</button>
+		</div>
+		<script
+			src="https://unpkg.com/htmx.org@1.9.5"
+			integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://cdn.tailwindcss.com"></script>
+	</body>
+</html>

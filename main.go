@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	store, err := db.NewPostgresStore()
 
 	if err != nil {
@@ -26,6 +27,6 @@ func main() {
 		log.Printf("%v\n", connStr)
 	}
 
-	server := api.NewAPIServer(":3000", store)
+	server := api.NewAPIServer("localhost:3000", store)
 	server.Run()
 }
