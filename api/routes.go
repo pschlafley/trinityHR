@@ -53,7 +53,7 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/api/departments", makeHTTPHandleFunc(s.handleGetDepartments))
 
-	log.Printf("server running at http://localhost%v\n", s.listenAddr)
+	log.Printf("server running at http://%v\n", s.listenAddr)
 
 	http.ListenAndServe(s.listenAddr, router)
 }

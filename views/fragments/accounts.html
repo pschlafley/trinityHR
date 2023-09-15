@@ -1,0 +1,25 @@
+{{ block "accounts-list" .}}
+<h1>Employees</h1>
+{{ range $account := . }}
+<div class="m-2 bg-sky-500 p-2 border-2 rounded-md border-black w-1/4">
+	<ul class="flex-row">
+		<li class="font-bold">
+			Name: <span class="text-white font-normal">{{$account.FullName}}</span>
+		</li>
+		<li class="font-bold">
+			Email: <span class="text-white font-normal">{{$account.Email}}</span>
+		</li>
+		<li class="font-bold">
+			Role: <span class="text-white font-normal">{{$account.Role}}</span>
+		</li>
+		<li class="font-bold">
+			Type:
+			<span class="text-white font-normal"> {{$account.AccountType}} </span>
+		</li>
+		<li class="font-bold">
+			Department:
+			<span class="text-white font-normal">{{$account.DepartmentName}}</span>
+		</li>
+	</ul>
+</div>
+{{ end }} {{ end }}

@@ -1,9 +1,9 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/pschlafley/trinityHR/types"
@@ -11,7 +11,7 @@ import (
 )
 
 func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request) error {
-	tmpl := template.Must(template.ParseFiles("views/accounts.html"))
+	tmpl := template.Must(template.ParseFiles("views/fragments/accounts.html"))
 
 	employees, err := s.store.GetAllAccounts()
 
@@ -19,10 +19,7 @@ func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
-	return tmpl.ExecuteTemplate(w, "test", employees)
-	// return tmpl.Execute(w, employees)
-
-	// return WriteJSON(w, http.StatusOK, employees)
+	return tmpl.Execute(w, employees)
 }
 
 func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request) error {
@@ -42,11 +39,28 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
-	var createEmployeeReq *types.CreateAccountRequest
+	createEmployeeReq := &types.CreateAccountRequest{}
 
-	if err := json.NewDecoder(r.Body).Decode(&createEmployeeReq); err != nil {
+	if err := r.ParseForm(); err != nil {
 		return err
 	}
+
+	deptID, err := strconv.Atoi(r.FormValue("deptID"))
+
+	if err != nil {
+		return err
+	}
+
+	createEmployeeReq.AccountType = r.FormValue("accountType")
+	createEmployeeReq.Role = r.FormValue("role")
+	createEmployeeReq.FullName = r.FormValue("fullName")
+	createEmployeeReq.Email = r.FormValue("email")
+	createEmployeeReq.Password = r.FormValue("password")
+	createEmployeeReq.Department_id = deptID
+
+	// if err := json.NewDecoder(r.Body).Decode(&createEmployeeReq); err != nil {
+	// 	return err
+	// }
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createEmployeeReq.Password), bcrypt.DefaultCost)
 

@@ -1,0 +1,31 @@
+{{ block "create-account" }}
+<form>
+	<input
+		placeholder="Account Type"
+		name="accountType"
+		type="radio"
+		value="Admin"
+		id="accountTypeAdmin"
+	/>
+	<label for="accountTypeAdmin" />
+
+	<input
+		placeholder="Account Type"
+		name="accountType"
+		type="radio"
+		value="Employee"
+		id="accountTypeEmp"
+	/>
+	<label for="accountTypeEmp" />
+
+	<input placeholder="Full Name" name="fullName" type="text" />
+
+	<input placeholder="Email" name="email" type="text" />
+
+	<input placeholder="Temp Password" name="tempPassword" type="text" />
+
+	<input placeholder="Role" name="role" type="text" />
+
+	<input placeholder="Department ID" name="deptID" type="text" />
+</form>
+{{ end }}
