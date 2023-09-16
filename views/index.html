@@ -5,159 +5,27 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>TrinityHR</title>
 	</head>
-	<body>
-		<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-			<div class="sm:mx-auto sm:w-full sm:max-w-sm">
-				<h2
-					class="mt-10 text-center text-4xl font-bold leading-9 tracking-tight text-gray-900"
-				>
-					Create Account
-				</h2>
-			</div>
+	<body class="block">
+		<h1 class="text-4xl text-center">Welcome To Your Dashboard</h1>
+		<ul class="mx-auto mt-5 text-center">
+			<li>
+				<button hx-get="/accounts/create" hx-target="#target" hx-swap="innerHTML">
+					Create an account
+				<button/>
+			</li>
+			<li>
+				<button hx-get="/accounts" hx-target="#target" hx-swap="innerHTML">
+					Get all accounts
+				<button/>
+			</li>
+			<li>
+				<button hx-get="/departments/create" hx-target="#target" hx-swap="innerHTML">
+					Create a department
+				<button/>
+			</li>
+		</ul>
 
-			<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-				<form class="space-y-6">
-					<div>
-						<label class="block text-xl font-medium leading-6 text-gray-900"
-							>Account Type</label
-						>
-						<div class="m-3">
-							<input name="accountType" type="radio" id="admin" value="Admin" />
-							<label class="text-lg font-medium text-gray-900" for="admin"
-								>Admin</label
-							>
-						</div>
-						<div class="m-3">
-							<input
-								name="accountType"
-								type="radio"
-								id="employee"
-								value="Employee"
-							/>
-							<label class="text-lg font-medium text-gray-900" for="employee"
-								>Employee</label
-							>
-						</div>
-					</div>
-
-					<div>
-						<label
-							for="fullName"
-							class="block text-xl font-medium leading-6 text-gray-900"
-							>Full Name</label
-						>
-						<div class="mt-2">
-							<input
-								id="fullName"
-								name="fullName"
-								type="email"
-								autocomplete="fullName"
-								required
-								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<label
-							for="role"
-							class="block text-xl font-medium leading-6 text-gray-900"
-							>Role</label
-						>
-						<div class="mt-2">
-							<input
-								id="role"
-								name="role"
-								type="email"
-								autocomplete="role"
-								required
-								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<label
-							for="deptID"
-							class="block text-xl font-medium leading-6 text-gray-900"
-							>Department ID</label
-						>
-						<div class="mt-2">
-							<input
-								id="deptID"
-								name="deptID"
-								type="email"
-								autocomplete="deptID"
-								required
-								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<label
-							for="email"
-							class="block text-xl font-medium leading-6 text-gray-900"
-							>Email address</label
-						>
-						<div class="mt-2">
-							<input
-								id="email"
-								name="email"
-								type="email"
-								autocomplete="email"
-								required
-								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<div class="flex items-center justify-between">
-							<label
-								for="password"
-								class="block text-xl font-medium leading-6 text-gray-900"
-								>Password</label
-							>
-						</div>
-						<div class="mt-2">
-							<input
-								id="password"
-								name="password"
-								type="password"
-								autocomplete="current-password"
-								required
-								class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-
-					<div>
-						<button
-							hx-post="api/accounts/create"
-							hx-target="body"
-							type="submit"
-							class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-						>
-							Sign in
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-		<!-- <div class="text-center">
-				<h1 class="text-4xl">Accounts</h1>
-				<div id="response-div" class="flex text-left"></div>
-			</div>
-			<button
-				class="rounded-full bg-indigo-500 text-white p-3 hover:bg-sky-500 ease-in duration-200"
-				hx-get="/api/accounts"
-				hx-trigger="click"
-				hx-target="#response-div"
-			>
-				Get Accounts
-			</button> -->
-		<!-- </div> -->
+		<div id="target"></div>
 
 		<script
 			src="https://unpkg.com/htmx.org@1.9.5"

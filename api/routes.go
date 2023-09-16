@@ -33,6 +33,12 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/", makeHTTPHandleFunc(handleHomePage))
 
+	router.HandleFunc("/accounts/create", makeHTTPHandleFunc(handleCreateAccountPage))
+
+	router.HandleFunc("/accounts", makeHTTPHandleFunc(handleGetAccountsPage))
+
+	router.HandleFunc("/departments/create", makeHTTPHandleFunc(handleCreateDepartmentsPage))
+
 	router.HandleFunc("/api/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
 
 	router.HandleFunc("/api/accounts/{id}", makeHTTPHandleFunc(s.handleGetAccountById))
@@ -62,6 +68,24 @@ func handleHomePage(w http.ResponseWriter, r *http.Request) error {
 	templ := template.Must(template.ParseFiles("views/index.html"))
 
 	return templ.Execute(w, nil)
+}
+
+func handleCreateAccountPage(w http.ResponseWriter, r *http.Request) error {
+	templ := template.Must(template.ParseFiles("views/fragments/createAccount.html"))
+
+	return templ.ExecuteTemplate(w, "create-account", nil)
+}
+
+func handleGetAccountsPage(w http.ResponseWriter, r *http.Request) error {
+	templ := template.Must(template.ParseFiles("views/fragments/accounts.html"))
+
+	return templ.ExecuteTemplate(w, "accounts", nil)
+}
+
+func handleCreateDepartmentsPage(w http.ResponseWriter, r *http.Request) error {
+	templ := template.Must(template.ParseFiles("views/fragments/createDepartment.html"))
+
+	return templ.ExecuteTemplate(w, "create-department", nil)
 }
 
 // func that returns Encoded JSON data

@@ -1,7 +1,23 @@
-{{ block "accounts-list" .}}
-<h1>Employees</h1>
-{{ range $account := . }}
-<div class="m-2 bg-sky-500 p-2 border-2 rounded-md border-black w-1/4">
+{{ block "accounts" .}}
+<div class="text-center">
+	<h1 class="text-4xl">Accounts</h1>
+	<div id="response-div" class="flex text-left"></div>
+</div>
+<button
+	class="rounded-full bg-indigo-500 text-white p-3 hover:bg-sky-500 ease-in duration-200"
+	hx-get="/api/accounts"
+	hx-trigger="click"
+	hx-target="#response-div"
+	hx-swap="outerHTML"
+>
+	Get Accounts
+</button>
+
+{{ block "accounts-list" . }} {{ range $account := . }}
+<div
+	id="response-div"
+	class="m-2 bg-sky-500 p-2 border-2 rounded-md border-black w-1/4"
+>
 	<ul class="flex-row">
 		<li class="font-bold">
 			Name: <span class="text-white font-normal">{{$account.FullName}}</span>
@@ -22,4 +38,4 @@
 		</li>
 	</ul>
 </div>
-{{ end }} {{ end }}
+{{ end }}{{ end }} {{ end }}

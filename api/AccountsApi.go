@@ -19,7 +19,7 @@ func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
-	return tmpl.Execute(w, employees)
+	return tmpl.ExecuteTemplate(w, "accounts-list", employees)
 }
 
 func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request) error {
@@ -39,6 +39,7 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
+	templ := template.Must(template.ParseFiles("views/fragments/createAccount.html"))
 	createEmployeeReq := &types.CreateAccountRequest{}
 
 	if err := r.ParseForm(); err != nil {
@@ -58,10 +59,6 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	createEmployeeReq.Password = r.FormValue("password")
 	createEmployeeReq.Department_id = deptID
 
-	// if err := json.NewDecoder(r.Body).Decode(&createEmployeeReq); err != nil {
-	// 	return err
-	// }
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createEmployeeReq.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -71,14 +68,14 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	accountID, err := s.store.CreateAccount(createEmployeeReq)
 
 	if err != nil {
-		return err
+		return WriteJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
 	var employee *types.Account
 
 	newEmployee := employee.NewAccount(accountID, string(hashedPassword), createEmployeeReq)
 
-	return WriteJSON(w, http.StatusOK, newEmployee)
+	return templ.ExecuteTemplate(w, "created-account", WriteJSON(w, http.StatusOK, newEmployee))
 }
 
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {

@@ -1,19 +1,26 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/pschlafley/trinityHR/types"
 )
 
 func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Request) error {
-	var request *types.CreateDepartmentRequest
-	var dept *types.Departments
+	var request *types.CreateDepartmentRequest = &types.CreateDepartmentRequest{}
+	var dept *types.Departments = &types.Departments{}
 
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	if err := r.ParseForm(); err != nil {
 		return err
 	}
+
+	deptName := r.FormValue("departmentName")
+
+	request.DepartmentName = deptName
+
+	// if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	// 	return err
+	// }
 
 	id, err := s.store.CreateDepartment(request)
 
