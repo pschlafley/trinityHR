@@ -31,7 +31,7 @@ func (s *APIServer) Run() {
 	// our handleAccount func returns an error which means that it is not of the same type of function that mux's HandleFunc requires
 	// So we need to convert our handler func to HttpHandler type
 
-	router.HandleFunc("/", makeHTTPHandleFunc(handleHomePage))
+	router.HandleFunc("/admin", makeHTTPHandleFunc(handleHomePage))
 
 	router.HandleFunc("/accounts/create", makeHTTPHandleFunc(handleCreateAccountPage))
 
@@ -39,6 +39,7 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/departments/create", makeHTTPHandleFunc(handleCreateDepartmentsPage))
 
+	// API Routes
 	router.HandleFunc("/api/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
 
 	router.HandleFunc("/api/accounts/{id}", makeHTTPHandleFunc(s.handleGetAccountById))
@@ -58,6 +59,8 @@ func (s *APIServer) Run() {
 	router.HandleFunc("/api/departments/create", makeHTTPHandleFunc(s.handleCreateDepartments))
 
 	router.HandleFunc("/api/departments", makeHTTPHandleFunc(s.handleGetDepartments))
+
+	router.HandleFunc("/api/departments-accounts-relation", makeHTTPHandleFunc(s.handleGetDepartmentsAccountsRelation))
 
 	log.Printf("server running at http://%v\n", s.listenAddr)
 

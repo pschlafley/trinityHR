@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"text/template"
 
 	"github.com/pschlafley/trinityHR/types"
 )
@@ -18,10 +19,6 @@ func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Reque
 
 	request.DepartmentName = deptName
 
-	// if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-	// 	return err
-	// }
-
 	id, err := s.store.CreateDepartment(request)
 
 	if err != nil {
@@ -34,11 +31,13 @@ func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Reque
 }
 
 func (s *APIServer) handleGetDepartments(w http.ResponseWriter, r *http.Request) error {
+	templ := template.Must(template.ParseFiles("views/fragments/departments.html"))
+
 	departments, err := s.store.GetDepartments()
 
 	if err != nil {
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, departments)
+	return templ.ExecuteTemplate(w, "departmenst-list", departments)
 }

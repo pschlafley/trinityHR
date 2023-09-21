@@ -75,6 +75,12 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 
 	newEmployee := employee.NewAccount(accountID, string(hashedPassword), createEmployeeReq)
 
+	_, relationErr := s.handleCreateDepartmentsAccountsRelation(deptID, accountID)
+
+	if relationErr != nil {
+		return relationErr
+	}
+
 	return templ.ExecuteTemplate(w, "created-account", WriteJSON(w, http.StatusOK, newEmployee))
 }
 

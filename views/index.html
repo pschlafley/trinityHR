@@ -3,29 +3,51 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css"
+			rel="stylesheet"
+		/>
 		<title>TrinityHR</title>
 	</head>
 	<body class="block">
-		<h1 class="text-4xl text-center">Welcome To Your Dashboard</h1>
-		<ul class="mx-auto mt-5 text-center">
-			<li>
-				<button hx-get="/accounts/create" hx-target="#target" hx-swap="innerHTML">
-					Create an account
-				<button/>
-			</li>
-			<li>
-				<button hx-get="/accounts" hx-target="#target" hx-swap="innerHTML">
-					Get all accounts
-				<button/>
-			</li>
-			<li>
-				<button hx-get="/departments/create" hx-target="#target" hx-swap="innerHTML">
-					Create a department
-				<button/>
-			</li>
-		</ul>
-
-		<div id="target"></div>
+		<nav class="bg-white border-gray-200 dark:bg-gray-900">
+			<div class="hidden w-full md:block md:w-auto" id="navbar-default">
+				<ul
+					class=" ml-3 font-medium flex flex-col mt-4 p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700"
+				>
+					<li>
+						<button
+							hx-get="/api/accounts" hx-target="#target" hx-swap="innerHTML"
+							class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+							>Employees
+						<button/>
+					</li>
+					<li>
+						<button
+							hx-get="/accounts/create" hx-target="#target" hx-swap="innerHTML"
+							class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+							>Create Account
+						</button>
+					</li>
+					<li>
+						<button
+							hx-get="/departments/create" hx-target="#target" hx-swap="innerHTML"
+							class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+							>Create Department
+						</button>
+					</li>
+					<li>
+						<button
+							hx-get="api/departments" hx-target="#target" hx-swap="innerHTML"
+							class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+							>Get Departments 
+						</button>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		
+		<div class="flex flex-wrap items-center justify-center" id="target"></div>
 
 		<script
 			src="https://unpkg.com/htmx.org@1.9.5"
@@ -33,5 +55,6 @@
 			crossorigin="anonymous"
 		></script>
 		<script src="https://cdn.tailwindcss.com"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
 	</body>
 </html>
