@@ -30,27 +30,30 @@ func (s *APIServer) Run() {
 	// our handleAccount func returns an error which means that it is not of the same type of function that mux's HandleFunc requires
 	// So we need to convert our handler func to HttpHandler type
 
-	router.HandleFunc("/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
+	// API Routes
+	router.HandleFunc("/api/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
 
-	router.HandleFunc("/accounts/{id}", makeHTTPHandleFunc(s.handleGetAccountById))
+	router.HandleFunc("/api/accounts/{id}", makeHTTPHandleFunc(s.handleGetAccountById))
 
-	router.HandleFunc("/accounts", makeHTTPHandleFunc(s.handleGetAllAccounts))
+	router.HandleFunc("/api/accounts", makeHTTPHandleFunc(s.handleGetAllAccounts))
 
-	router.HandleFunc("/accounts/delete/{id}", makeHTTPHandleFunc(s.handleDeleteAccount))
+	router.HandleFunc("/api/accounts/delete/{id}", makeHTTPHandleFunc(s.handleDeleteAccount))
 
-	router.HandleFunc("/time-off/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
+	router.HandleFunc("/api/time-off/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
 
-	router.HandleFunc("/time-off", makeHTTPHandleFunc(s.handleGetTimeOffRequests))
+	router.HandleFunc("/api/time-off", makeHTTPHandleFunc(s.handleGetTimeOffRequests))
 
-	router.HandleFunc("/account-time-off-relation/create", makeHTTPHandleFunc(s.handleCreateAccountsTimeOffRelationTable))
+	router.HandleFunc("/api/account-time-off-relation/create", makeHTTPHandleFunc(s.handleCreateAccountsTimeOffRelationTable))
 
-	router.HandleFunc("/account-time-off-relation", makeHTTPHandleFunc(s.handleGetAccountsTimeOffRelationTable))
+	router.HandleFunc("/api/account-time-off-relation", makeHTTPHandleFunc(s.handleGetAccountsTimeOffRelationTable))
 
-	router.HandleFunc("/departments/create", makeHTTPHandleFunc(s.handleCreateDepartments))
+	router.HandleFunc("/api/departments/create", makeHTTPHandleFunc(s.handleCreateDepartments))
 
-	router.HandleFunc("/departments", makeHTTPHandleFunc(s.handleGetDepartments))
+	router.HandleFunc("/api/departments", makeHTTPHandleFunc(s.handleGetDepartments))
 
-	log.Printf("server running at http://localhost%v\n", s.listenAddr)
+	router.HandleFunc("/api/departments-accounts-relation", makeHTTPHandleFunc(s.handleGetDepartmentsAccountsRelation))
+
+	log.Printf("server running at http://%v\n", s.listenAddr)
 
 	http.ListenAndServe(s.listenAddr, router)
 }

@@ -8,4 +8,4 @@ require (
 	golang.org/x/crypto v0.12.0
 )
 
-require github.com/gofor-little/env v1.0.14 // indirect
+require github.com/gofor-little/env v1.0.14

@@ -58,6 +58,14 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 
 	newEmployee := employee.NewAccount(accountID, string(hashedPassword), createEmployeeReq)
 
+	var relation *types.DepartmentsAccountsRelationReq = &types.DepartmentsAccountsRelationReq{DepartmentId: createEmployeeReq.Department_id, AccountId: accountID}
+
+	_, relationErr := s.store.CreateDepartmentsAccountsRelation(relation)
+
+	if relationErr != nil {
+		return relationErr
+	}
+
 	return WriteJSON(w, http.StatusOK, newEmployee)
 }
 

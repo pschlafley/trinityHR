@@ -26,6 +26,6 @@ func main() {
 		log.Printf("%v\n", connStr)
 	}
 
-	server := api.NewAPIServer(":3000", store)
+	server := api.NewAPIServer("localhost:3000", store)
 	server.Run()
 }

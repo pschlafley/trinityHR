@@ -23,6 +23,8 @@ type Storage interface {
 	GetAccountsTimeOffRelations() ([]*types.AccountTimeOffRelationQueryData, error)
 	CreateDepartment(*types.CreateDepartmentRequest) (int, error)
 	GetDepartments() ([]*types.Departments, error)
+	CreateDepartmentsAccountsRelation(*types.DepartmentsAccountsRelationReq) (int, error)
+	GetDepartmentsAccountsRelation() ([]*types.DepartmentsAccountsRelationQuery, error)
 }
 
 type PostgresStore struct {
@@ -31,9 +33,14 @@ type PostgresStore struct {
 
 func (s *PostgresStore) DropTable() error {
 	dropDepartmentsTable := `DROP TABLE IF EXISTS departments`
+	dropDepartmentsAccountsRelationTable := `DROP TABLE IF EXISTS departmentsaccountsrelation`
 	dropAccountsTimeOffTable := `DROP TABLE IF EXISTS accountsTimeOffRelation`
 	dropTimeOffTable := `DROP TABLE IF EXISTS timeOff`
 	dropAccountsTable := `DROP TABLE IF EXISTS accounts`
+
+	if _, dropDepartmentsAccountsRelationTableErr := s.db.Exec(dropDepartmentsAccountsRelationTable); dropDepartmentsAccountsRelationTableErr != nil {
+		return dropDepartmentsAccountsRelationTableErr
+	}
 
 	if _, accountsTimeOffTableErr := s.db.Exec(dropAccountsTimeOffTable); accountsTimeOffTableErr != nil {
 		return accountsTimeOffTableErr
@@ -51,7 +58,7 @@ func (s *PostgresStore) DropTable() error {
 		return dropDepartmentsTableErr
 	}
 
-	fmt.Print("dropped all 4 tables\n")
+	fmt.Print("dropped all 5 tables\n")
 
 	return nil
 }
@@ -63,6 +70,10 @@ func (s *PostgresStore) Init() (string, error) {
 
 	if accountsTableError := s.createAccountsTable(); accountsTableError != nil {
 		return "", fmt.Errorf("AccountsTableError: %v", accountsTableError)
+	}
+
+	if departmentsAccountsRelationErr := s.createDepartmentsAccountsRelationTable(); departmentsAccountsRelationErr != nil {
+		return "", fmt.Errorf("AccountsTableError: %v", departmentsAccountsRelationErr)
 	}
 
 	if timeOffTableError := s.createTimeOffTable(); timeOffTableError != nil {
