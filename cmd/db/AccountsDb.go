@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/pschlafley/trinityHR/types"
 )
 
@@ -67,7 +68,7 @@ func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationDa
 	var accounts []*types.AccountsDepartmentsRelationData
 
 	for rows.Next() {
-		account, err := scanIntoAccount(rows)
+		account, err := scanIntoAccountDepartmentsRelationData(rows)
 
 		if err != nil {
 			return nil, fmt.Errorf("error scanning into accounts: %d", err)
@@ -93,12 +94,87 @@ func (s *PostgresStore) GetAccountByID(id int) (*types.AccountsDepartmentsRelati
 	}
 
 	for rows.Next() {
-		return scanIntoAccount(rows)
+		return scanIntoAccountDepartmentsRelationData(rows)
 	}
 
 	return nil, fmt.Errorf("account %d not found", id)
 }
-func scanIntoAccount(rows *sql.Rows) (*types.AccountsDepartmentsRelationData, error) {
+
+func (s *PostgresStore) GetAccountByEmail(email string) (*types.Account, error) {
+	query := "SELECT * FROM accounts WHERE email = $1"
+	rows, err := s.db.Query(query, email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanIntoAccount(rows)
+	}
+
+	return nil, nil
+}
+
+func (s *PostgresStore) GetAccountByJWT(token *jwt.Token) (*types.Account, error) {
+	tokenID := token.Claims.(jwt.MapClaims)
+	query := `SELECT account_id, account_type, role, full_name, email, created_at, department_id FROM accounts WHERE account_id = $1`
+
+	rows, err := s.db.Query(query, tokenID["accountID"])
+
+	if err != nil {
+		return nil, err
+	}
+
+	var account *types.Account
+
+	for rows.Next() {
+		a, err := scanIntoJWTAccountQuery(rows)
+
+		if err != nil {
+			return nil, err
+		}
+
+		account = a
+	}
+
+	return account, nil
+
+}
+
+func scanIntoAccount(rows *sql.Rows) (*types.Account, error) {
+	employee := types.Account{}
+
+	err := rows.Scan(
+		&employee.AccountID,
+		&employee.AccountType,
+		&employee.Role,
+		&employee.FullName,
+		&employee.Email,
+		&employee.Password,
+		&employee.CreatedAt,
+		&employee.DepartmentID,
+	)
+
+	return &employee, err
+}
+
+func scanIntoJWTAccountQuery(rows *sql.Rows) (*types.Account, error) {
+	employee := types.Account{}
+
+	err := rows.Scan(
+		&employee.AccountID,
+		&employee.AccountType,
+		&employee.Role,
+		&employee.FullName,
+		&employee.Email,
+		&employee.CreatedAt,
+		&employee.DepartmentID,
+	)
+
+	return &employee, err
+}
+
+func scanIntoAccountDepartmentsRelationData(rows *sql.Rows) (*types.AccountsDepartmentsRelationData, error) {
 	employee := types.AccountsDepartmentsRelationData{}
 
 	err := rows.Scan(

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/pschlafley/trinityHR/types"
 
 	"github.com/gofor-little/env"
@@ -25,6 +26,8 @@ type Storage interface {
 	GetDepartments() ([]*types.Departments, error)
 	CreateDepartmentsAccountsRelation(*types.DepartmentsAccountsRelationReq) (int, error)
 	GetDepartmentsAccountsRelation() ([]*types.DepartmentsAccountsRelationQuery, error)
+	GetAccountByEmail(string) (*types.Account, error)
+	GetAccountByJWT(*jwt.Token) (*types.Account, error)
 }
 
 type PostgresStore struct {

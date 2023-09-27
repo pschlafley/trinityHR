@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/pschlafley/trinityHR/types"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request) error {
@@ -42,12 +41,6 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createEmployeeReq.Password), bcrypt.DefaultCost)
-
-	if err != nil {
-		return fmt.Errorf("hashing password error: %v", err)
-	}
-
 	accountID, err := s.store.CreateAccount(createEmployeeReq)
 
 	if err != nil {
@@ -56,7 +49,11 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 
 	var employee *types.Account
 
-	newEmployee := employee.NewAccount(accountID, string(hashedPassword), createEmployeeReq)
+	newEmployee, err := employee.NewAccount(accountID, createEmployeeReq.Password, createEmployeeReq)
+
+	if err != nil {
+		return err
+	}
 
 	var relation *types.DepartmentsAccountsRelationReq = &types.DepartmentsAccountsRelationReq{DepartmentId: createEmployeeReq.Department_id, AccountId: accountID}
 
@@ -83,4 +80,31 @@ func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) 
 	}
 
 	return WriteJSON(w, http.StatusOK, map[string]int{"deleted": id})
+}
+
+func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
+
+	var loginReq *types.AccountLoginReq
+
+	err := json.NewDecoder(r.Body).Decode(&loginReq)
+
+	if err != nil {
+		return fmt.Errorf("error decoding login: %v", err)
+	}
+
+	account, err := s.store.GetAccountByEmail(loginReq.Email)
+
+	if err != nil {
+		return err
+	}
+
+	token, err := createJWT(account)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Print("JWT token: ", token)
+
+	return nil
 }

@@ -34,7 +34,7 @@ func (s *APIServer) Run() {
 	// API Routes
 	router.HandleFunc("/api/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
 
-	router.HandleFunc("/api/accounts/{id}", makeHTTPHandleFunc(s.handleGetAccountById))
+	router.HandleFunc("/api/accounts/{id}", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetAccountById)))
 
 	router.HandleFunc("/api/accounts", makeHTTPHandleFunc(s.handleGetAllAccounts))
 
@@ -54,6 +54,8 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/api/departments-accounts-relation", makeHTTPHandleFunc(s.handleGetDepartmentsAccountsRelation))
 
+	router.HandleFunc("/api/login", makeHTTPHandleFunc(s.handleLogin))
+
 	handler := cors.Default().Handler(router)
 
 	log.Printf("server running at http://%v\n", s.listenAddr)
@@ -63,7 +65,7 @@ func (s *APIServer) Run() {
 
 // func that returns Encoded JSON data
 func WriteJSON(w http.ResponseWriter, status int, value any) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/jso")
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(value)
 }
