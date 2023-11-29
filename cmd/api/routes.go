@@ -3,13 +3,14 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/pschlafley/trinityHR/db"
 	"github.com/rs/cors"
+	"go.uber.org/zap"
+
+	"github.com/pschlafley/trinityHR/db"
 )
 
 type APIServer struct {
@@ -24,7 +25,7 @@ func NewAPIServer(listenAddr string, store db.Storage) *APIServer {
 	}
 }
 
-func (s *APIServer) Run() {
+func (s *APIServer) Run(logger *zap.Logger) {
 	// with Mux Router we cannot specify if we are doind GET, POST, DELETE, or PUT request so we need to handle this ourselves
 	router := mux.NewRouter()
 	// MUX's HandleFunc takes a Path string and func(http.ResponseWriter, *http.Request) which is of the type HttpHandler from the net/http package
@@ -58,7 +59,7 @@ func (s *APIServer) Run() {
 
 	handler := cors.Default().Handler(router)
 
-	log.Printf("server running at http://%v\n", s.listenAddr)
+	logger.Log(zap.InfoLevel, "server running at http://localhost:3000/")
 
 	http.ListenAndServe(s.listenAddr, handler)
 }

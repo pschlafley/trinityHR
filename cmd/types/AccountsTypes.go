@@ -11,6 +11,11 @@ type AccountLoginReq struct {
 	Password string `json:"password"`
 }
 
+type LoginResponse struct {
+	AccountID int    `json:"account_id"`
+	Token     string `json:"token"`
+}
+
 type CreateAccountRequest struct {
 	AccountType   string `json:"account_type"`
 	Role          string `json:"role"`
@@ -43,7 +48,6 @@ type AccountsDepartmentsRelationData struct {
 
 func (*Account) NewAccount(id int, password string, req *CreateAccountRequest) (*Account, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
 	if err != nil {
 		return nil, err
 	}
@@ -58,4 +62,8 @@ func (*Account) NewAccount(id int, password string, req *CreateAccountRequest) (
 		CreatedAt:    time.Now().UTC(),
 		DepartmentID: req.Department_id,
 	}, nil
+}
+
+func (a *Account) ValidatePassword(pw string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(pw)) == nil
 }

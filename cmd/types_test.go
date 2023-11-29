@@ -35,5 +35,4 @@ func TestNewAccount(t *testing.T) {
 	assert.Nil(t, err)
 
 	fmt.Printf("%+v\n", acc)
-
 }

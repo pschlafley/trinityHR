@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/pschlafley/trinityHR/types"
@@ -15,8 +16,9 @@ func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Reque
 		return err
 	}
 
-	id, err := s.store.CreateDepartment(request)
+	fmt.Print(request)
 
+	id, err := s.store.CreateDepartment(request)
 	if err != nil {
 		return err
 	}
@@ -28,7 +30,6 @@ func (s *APIServer) handleCreateDepartments(w http.ResponseWriter, r *http.Reque
 
 func (s *APIServer) handleGetDepartments(w http.ResponseWriter, r *http.Request) error {
 	departments, err := s.store.GetDepartments()
-
 	if err != nil {
 		return err
 	}

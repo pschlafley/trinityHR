@@ -7,7 +7,7 @@ type AccountsTimeOffRelationRequest struct {
 }
 
 type AccountsTimeOffRelationTable struct {
-	AccountsTimeOffRelationID int `json:"accounts_timeOff_relation_id"`
+	AccountsTimeOffRelationID int `json:"accounts_time_off_relation_id"`
 	AccountID                 int `json:"account_id"`
 	TimeOffID                 int `json:"time_off_id"`
 }
