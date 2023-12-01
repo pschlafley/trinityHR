@@ -1,42 +1,46 @@
-import { useState } from 'react';
-import { Container, Group, Burger } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useLocation } from 'react-router-dom';
+import { Container, Group, Image } from '@mantine/core';
 import classes from './navbar.module.css';
-
-const links = [
-	{ link: '/about', label: 'Accounts' },
-	{ link: '/pricing', label: 'Departments' },
-	{ link: '/learn', label: 'Settings' },
-	{ link: '/community', label: 'Calendar' },
-];
+import logo from '../../assets/TrinityLogo.png';
 
 export function NavBar() {
-	const [opened, { toggle }] = useDisclosure(false);
-	const [active, setActive] = useState(links[0].link);
+	const windowPath = useLocation().pathname;
 
-	const items = links.map((link) => (
-		<a
-			key={link.label}
-			href={link.link}
-			className={classes.link}
-			data-active={active === link.link || undefined}
-			onClick={(event) => {
-				event.preventDefault();
-				setActive(link.link);
-			}}
-		>
-			{link.label}
-		</a>
-	));
+	const homePath = windowPath == '/' ? true : false;
+	const accountsPath = windowPath == '/accounts' ? true : false;
 
 	return (
 		<header className={classes.header}>
 			<Container size="md" className={classes.inner}>
 				<Group gap={5} visibleFrom="xs">
-					{items}
+					<Image
+						className={classes.logo}
+						src={logo}
+						radius="lg"
+						h={100}
+						w={100}
+					/>
+					<a
+						key="home"
+						href="/"
+						className={
+							homePath ? `${classes.active} ${classes.link}` : `${classes.link}`
+						}
+					>
+						Home
+					</a>
+					<a
+						key="accounts"
+						href="/accounts"
+						className={
+							accountsPath
+								? `${classes.active} ${classes.link}`
+								: `${classes.link}`
+						}
+					>
+						Accounts
+					</a>
 				</Group>
-
-				<Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
 			</Container>
 		</header>
 	);

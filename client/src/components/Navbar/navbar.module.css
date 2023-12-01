@@ -28,9 +28,9 @@
 			var(--mantine-color-dark-6)
 		);
 	}
+}
 
-	[data-mantine-color-scheme] &[data-active] {
-		background-color: var(--mantine-color-blue-filled);
-		color: var(--mantine-color-white);
-	}
+.active {
+	background-color: var(--mantine-color-blue-filled);
+	color: var(--mantine-color-white);
 }

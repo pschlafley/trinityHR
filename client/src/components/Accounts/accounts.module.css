@@ -1,7 +1,21 @@
+.container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10;
+	justify-content: space-around;
+}
+
 .card {
 	background-color: var(--mantine-color-body);
+	width: 25%;
+	margin: 0 auto;
 }
 
 .avatar {
 	border: rem(2px) solid var(--mantine-color-body);
+}
+
+.logo {
+	margin: 100px;
 }

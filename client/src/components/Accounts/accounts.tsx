@@ -1,17 +1,27 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import classes from './accounts.module.css';
 import { Card, Avatar, Text, Group } from '@mantine/core';
-import Account from 'src/types/AccountTypes';
+import useSWR from 'swr';
+import Account from '../../types/AccountTypes';
 
-interface PropsTypes {
-	data: Promise<unknown>;
-	arrayData: Account[];
-}
+export const ENDPOINT = 'http://localhost:3000';
 
-export const AccountsComponent = (props: PropsTypes) => {
+const fetcher = async (url: string) => {
+	const res = await fetch(`${ENDPOINT}/${url}`);
+	return await res.json();
+};
+
+export const AccountsComponent = () => {
+	const arrayData: Account[] = [];
+
+	const { data } = useSWR('api/accounts', fetcher);
+
+	for (let i = 0; i < data?.length; i++) {
+		arrayData.push(data[i]);
+	}
 	return (
-		<div>
-			{props.arrayData.map((account: Account) => (
+		<div className={classes.container}>
+			{arrayData.map((account: Account) => (
 				<Card
 					key={account.account_id}
 					withBorder
