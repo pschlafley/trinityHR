@@ -4,7 +4,7 @@ import useSWR from 'swr';
 import Account from './types/AccountTypes';
 import { HeroComponent } from './components/heroComponent/HeroComponent';
 import { AccountsComponent } from './components/Accounts/accounts';
-import { NavBar } from './components/Navbar/navbar';
+import { NavBar } from './components/Navbar/Navbar';
 import { MantineProvider } from '@mantine/core';
 
 export const ENDPOINT = 'http://localhost:3000';
