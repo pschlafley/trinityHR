@@ -66,7 +66,7 @@ func (s *APIServer) Run(logger *zap.Logger) {
 
 // func that returns Encoded JSON data
 func WriteJSON(w http.ResponseWriter, status int, value any) error {
-	w.Header().Set("Content-Type", "application/jso")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(value)
 }
