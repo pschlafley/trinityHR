@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
-import { Container, Group, Image } from '@mantine/core';
+import { Container, Group, Anchor } from '@mantine/core';
 import classes from './navbar.module.css';
-import logo from '../../assets/TrinityLogo.png';
+// import logo from '../../assets/TrinityLogo.png';
 
 export function NavBar() {
 	const windowPath = useLocation().pathname;
@@ -13,33 +13,35 @@ export function NavBar() {
 		<header className={classes.header}>
 			<Container size="md" className={classes.inner}>
 				<Group gap={5} visibleFrom="xs">
-					<Image
+					{/* <Image
 						className={classes.logo}
 						src={logo}
 						radius="lg"
 						h={100}
 						w={100}
-					/>
-					<a
+					/> */}
+					<Anchor
 						key="home"
 						href="/"
 						className={
-							homePath ? `${classes.active} ${classes.link}` : `${classes.link}`
+							homePath
+								? `${classes.active} ${classes.linkActive}`
+								: `${classes.link}`
 						}
 					>
 						Home
-					</a>
-					<a
+					</Anchor>
+					<Anchor
 						key="accounts"
 						href="/accounts"
 						className={
 							accountsPath
-								? `${classes.active} ${classes.link}`
+								? `${classes.active} ${classes.linkActive}`
 								: `${classes.link}`
 						}
 					>
 						Accounts
-					</a>
+					</Anchor>
 				</Group>
 			</Container>
 		</header>

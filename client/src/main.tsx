@@ -4,7 +4,7 @@ import App from './App';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { NotFound } from './components/NotFound/NotFound';
 import { MantineProvider } from '@mantine/core';
-import { AccountsComponent } from './components/Accounts/accounts';
+import { AccountsComponent } from './pages/accounts';
 
 const router = createBrowserRouter([
 	{

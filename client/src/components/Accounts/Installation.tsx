@@ -1,13 +1,12 @@
 import { IAccountProps, IAccount } from '../../types/AccountTypes';
 import { Card, Avatar, Text, Group } from '@mantine/core';
-import classes from './accounts.module.css';
+import classes from './accountsComponent.module.css';
 
 export function AssemblyInstallationDept(props: IAccountProps) {
-	console.log(props);
 	return (
 		<div>
 			<h1>Assembly and Installation Department</h1>
-			<div className={classes.container}>
+			<div className={classes.cardContainer}>
 				{props.accountsArray.map((account: IAccount) => (
 					<Card
 						key={account.account_id}
