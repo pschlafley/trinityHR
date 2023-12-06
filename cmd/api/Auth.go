@@ -56,12 +56,9 @@ func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		userReqID, err := getIdParam(r)
+		claims := token.Claims.(jwt.MapClaims)
 
-		if err != nil {
-			permissionDenied(w)
-			return
-		}
+		userReqID := claims["accountID"]
 
 		account, err := s.store.GetAccountByJWT(token)
 
@@ -70,14 +67,10 @@ func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		if userReqID != account.AccountID {
+		if userReqID != float64(account.AccountID) {
 			permissionDenied(w)
 			return
 		}
-
-		claims := token.Claims.(jwt.MapClaims)
-
-		fmt.Println(claims)
 
 		handlerFunc(w, r)
 

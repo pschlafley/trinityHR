@@ -37,7 +37,7 @@ func (s *APIServer) Run(logger *zap.Logger) {
 
 	router.HandleFunc("/api/accounts/{id}", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetAccountById)))
 
-	router.HandleFunc("/api/accounts", makeHTTPHandleFunc(s.handleGetAllAccounts))
+	router.HandleFunc("/api/accounts", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetAllAccounts)))
 
 	router.HandleFunc("/api/accounts/delete/{id}", makeHTTPHandleFunc(s.handleDeleteAccount))
 
@@ -51,13 +51,13 @@ func (s *APIServer) Run(logger *zap.Logger) {
 
 	router.HandleFunc("/api/departments/create", makeHTTPHandleFunc(s.handleCreateDepartments))
 
-	router.HandleFunc("/api/departments", makeHTTPHandleFunc(s.handleGetDepartments))
+	router.HandleFunc("/api/departments", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetDepartments)))
 
 	router.HandleFunc("/api/departments-accounts-relation", makeHTTPHandleFunc(s.handleGetDepartmentsAccountsRelation))
 
 	router.HandleFunc("/api/login", makeHTTPHandleFunc(s.handleLogin))
 
-	handler := cors.Default().Handler(router)
+	handler := cors.AllowAll().Handler(router)
 
 	logger.Log(zap.InfoLevel, "server running at http://localhost:3000/")
 

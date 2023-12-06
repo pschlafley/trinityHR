@@ -1,4 +1,4 @@
-import { Title, Text, Button, Container, Group } from '@mantine/core';
+import { Title, Text, Button, Container, Anchor, Group } from '@mantine/core';
 import classes from './NotFound.module.css';
 import { useRouteError } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ export function NotFound() {
 			</Text>
 			<Group justify="center">
 				<Button variant="subtle" size="md">
-					Take me back to home page
+					<Anchor href="/">Take me back to home page</Anchor>
 				</Button>
 			</Group>
 		</Container>

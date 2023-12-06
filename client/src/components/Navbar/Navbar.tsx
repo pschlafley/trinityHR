@@ -8,18 +8,12 @@ export function NavBar() {
 
 	const homePath = windowPath == '/' ? true : false;
 	const accountsPath = windowPath == '/accounts' ? true : false;
+	const loginPath = windowPath == '/login' ? true : false;
 
 	return (
 		<header className={classes.header}>
 			<Container size="md" className={classes.inner}>
 				<Group gap={5} visibleFrom="xs">
-					{/* <Image
-						className={classes.logo}
-						src={logo}
-						radius="lg"
-						h={100}
-						w={100}
-					/> */}
 					<Anchor
 						key="home"
 						href="/"
@@ -41,6 +35,17 @@ export function NavBar() {
 						}
 					>
 						Accounts
+					</Anchor>
+					<Anchor
+						key="login"
+						href="/login"
+						className={
+							loginPath
+								? `${classes.active} ${classes.linkActive}`
+								: `${classes.link}`
+						}
+					>
+						Login
 					</Anchor>
 				</Group>
 			</Container>

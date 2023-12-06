@@ -1,15 +1,23 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import classes from './accounts.module.css';
+import pageStyles from './pages.module.css';
 import useSWR from 'swr';
 import { IAccount } from '../types/AccountTypes';
 import { AssemblyInstallationDept } from '../components/Accounts/Installation';
 import { SalesDept } from '../components/Accounts/Sales';
 import { ManagementDept } from '../components/Accounts/Management';
+import Cookies from 'js-cookie';
 
 export const ENDPOINT = 'http://localhost:3000';
 
+const user = Cookies.get('token');
+
 const fetcher = async (url: string) => {
-	const res = await fetch(`${ENDPOINT}/${url}`);
+	const res = await fetch(`${ENDPOINT}/${url}`, {
+		headers: {
+			'x-jwt-token': user ? user.toString() : '',
+		},
+	});
 	return await res.json();
 };
 
@@ -18,8 +26,12 @@ export const AccountsComponent = () => {
 	const salesArray: IAccount[] = [];
 	const managementArray: IAccount[] = [];
 
-	const accountReq = useSWR('api/accounts', fetcher);
-	const departmentReq = useSWR('api/departments', fetcher);
+	const accountReq = useSWR('api/accounts', fetcher, {
+		refreshInterval: 60000,
+	});
+	const departmentReq = useSWR('api/departments', fetcher, {
+		refreshInterval: 60000,
+	});
 
 	for (let i = 0; i < accountReq.data?.length; i++) {
 		for (let j = 0; j < departmentReq.data?.length; j++) {
@@ -43,10 +55,16 @@ export const AccountsComponent = () => {
 	}
 
 	return (
-		<div className={classes.container}>
-			<AssemblyInstallationDept accountsArray={assemblyInstallArray} />
-			<SalesDept accountsArray={salesArray} />
-			<ManagementDept accountsArray={managementArray} />
+		<div className={`${classes.container} ${pageStyles.container}`}>
+			{user ? (
+				<div>
+					<AssemblyInstallationDept accountsArray={assemblyInstallArray} />
+					<SalesDept accountsArray={salesArray} />
+					<ManagementDept accountsArray={managementArray} />
+				</div>
+			) : (
+				<div>Not Authenticated</div>
+			)}
 		</div>
 	);
 };

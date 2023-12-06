@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { NotFound } from './components/NotFound/NotFound';
 import { MantineProvider } from '@mantine/core';
 import { AccountsComponent } from './pages/accounts';
+import { LoginPage } from './pages/login';
 
 const router = createBrowserRouter([
 	{
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
 			{
 				path: '/accounts',
 				element: <AccountsComponent />,
+			},
+			{
+				path: '/login',
+				element: <LoginPage />,
 			},
 		],
 	},
