@@ -58,7 +58,12 @@ func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 
 		claims := token.Claims.(jwt.MapClaims)
 
-		userReqID := claims["accountID"]
+		var userReqID float64 = claims["accountID"].(float64)
+
+		if userReqID == 0 {
+			permissionDenied(w)
+			return
+		}
 
 		account, err := s.store.GetAccountByJWT(token)
 

@@ -49,3 +49,11 @@
 	background-color: var(--mantine-color-cyan-5);
 	color: var(--mantine-color-white);
 }
+
+.logoutBtn {
+	background-color: var(--mantine-color-red-5);
+}
+
+/* .logoutBtn:hover {
+	background-color: var(mantine-color);
+} */

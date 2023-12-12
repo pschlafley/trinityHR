@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// dropDBerr := store.DropTable()
-	//
+
 	// if dropDBerr != nil {
 	// 	log.Fatal(dropDBerr)
 	// }

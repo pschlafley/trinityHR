@@ -2,7 +2,7 @@ import { TextInput, Button, Group, Box } from '@mantine/core';
 import styles from './pages.module.css';
 import { useForm } from '@mantine/form';
 import { ENDPOINT } from './accounts';
-import Cookies from 'js-cookie';
+import { setToken } from '../utils/Authentication/Auth';
 
 export const LoginPage = () => {
 	const form = useForm({
@@ -31,9 +31,11 @@ export const LoginPage = () => {
 			body: JSON.stringify(form.values),
 		}).then((r) => r.json());
 
-		Cookies.set('token', login.token);
+		setToken(login.token);
 
 		form.reset();
+
+		window.location.replace(`http://localhost:5173/accounts`);
 	};
 
 	return (

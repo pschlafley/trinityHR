@@ -1,21 +1,25 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import classes from './accounts.module.css';
+import classes from '../components/Accounts/accountsComponent.module.css';
 import pageStyles from './pages.module.css';
 import useSWR from 'swr';
 import { IAccount } from '../types/AccountTypes';
 import { AssemblyInstallationDept } from '../components/Accounts/Installation';
 import { SalesDept } from '../components/Accounts/Sales';
 import { ManagementDept } from '../components/Accounts/Management';
-import Cookies from 'js-cookie';
+import { NotAuthenticated } from '../components/NotAuthenticated/NotAuthenticated';
+import { getToken, loggedIn } from '../utils/Authentication/Auth';
+// import { IDepartment } from '../types/DepartmentTypes';
 
 export const ENDPOINT = 'http://localhost:3000';
 
-const user = Cookies.get('token');
+const token = getToken();
+
+const isLoggedIn: boolean = loggedIn();
 
 const fetcher = async (url: string) => {
 	const res = await fetch(`${ENDPOINT}/${url}`, {
 		headers: {
-			'x-jwt-token': user ? user.toString() : '',
+			'x-jwt-token': token ? token.toString() : '',
 		},
 	});
 	return await res.json();
@@ -56,14 +60,16 @@ export const AccountsComponent = () => {
 
 	return (
 		<div className={`${classes.container} ${pageStyles.container}`}>
-			{user ? (
+			{isLoggedIn ? (
 				<div>
 					<AssemblyInstallationDept accountsArray={assemblyInstallArray} />
 					<SalesDept accountsArray={salesArray} />
 					<ManagementDept accountsArray={managementArray} />
 				</div>
 			) : (
-				<div>Not Authenticated</div>
+				<div>
+					<NotAuthenticated />
+				</div>
 			)}
 		</div>
 	);

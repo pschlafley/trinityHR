@@ -62,6 +62,10 @@ func (s *PostgresStore) GetDepartmentsAccountsRelation() ([]*types.DepartmentsAc
 	return departmentsAccountsArr, nil
 }
 
+func (s *PostgresStore) GetDepartmentsAccountsRelationByDepartment([]*types.DepartmentsAccountsRelationQuery, error) {
+
+}
+
 func scanIntoDepartmentsAccountsRelationQuery(rows *sql.Rows) (*types.DepartmentsAccountsRelationQuery, error) {
 	data := types.DepartmentsAccountsRelationQuery{}
 
