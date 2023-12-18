@@ -70,6 +70,3 @@ func NewDevelopmentLog() (*zap.Logger, error) {
 
 	return logger, err
 }
-
-func writeToFile() {
-}

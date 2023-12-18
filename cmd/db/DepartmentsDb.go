@@ -9,30 +9,9 @@ import (
 )
 
 func (s *PostgresStore) createDepartmentsTable() error {
-	_, createTypeErr := s.db.Exec(
-		`DO $$ BEGIN 
-			IF to_regtype('account') IS NULL THEN	
-				CREATE TYPE account AS (
-					id int, 
-					account_type varchar,
-					role varchar,
-					full_name varchar,
-					email varchar, 
-					password varchar,
-					created_at timestamp,
-					department_id int 
-				);
-			END IF;
-		END $$;`)
-
-	if createTypeErr != nil {
-		return createTypeErr
-	}
-
 	query := `CREATE TABLE IF NOT EXISTS departments(
 		department_id serial NOT NULL PRIMARY KEY, 
 		department_name varchar(100) NOT NULL,
-		account_data account,
 		created_at timestamp
 	)`
 
