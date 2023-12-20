@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
-	"github.com/rs/cors"
-	"go.uber.org/zap"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/pschlafley/trinityHR/db"
 )
@@ -25,43 +24,37 @@ func NewAPIServer(listenAddr string, store db.Storage) *APIServer {
 	}
 }
 
-func (s *APIServer) Run(logger *zap.Logger) {
-	// with Mux Router we cannot specify if we are doind GET, POST, DELETE, or PUT request so we need to handle this ourselves
-	router := mux.NewRouter()
-	// MUX's HandleFunc takes a Path string and func(http.ResponseWriter, *http.Request) which is of the type HttpHandler from the net/http package
-	// our handleAccount func returns an error which means that it is not of the same type of function that mux's HandleFunc requires
-	// So we need to convert our handler func to HttpHandler type
-
+func (s *APIServer) Run(app *echo.Echo, server *APIServer) {
 	// API Routes
-	router.HandleFunc("/api/accounts/create", makeHTTPHandleFunc(s.handleCreateAccount))
+	app.POST("/api/accounts/create", s.handleCreateAccount)
 
-	router.HandleFunc("/api/accounts/{id}", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetAccountById)))
+	app.GET("/api/accounts/:id", s.handleGetAccountById)
 
-	router.HandleFunc("/api/accounts", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetAllAccounts)))
+	app.GET("/api/accounts", s.handleGetAllAccounts)
 
-	router.HandleFunc("/api/accounts/delete/{id}", makeHTTPHandleFunc(s.handleDeleteAccount))
+	app.PUT("/api/accounts/delete/:id", s.handleDeleteAccount)
 
-	router.HandleFunc("/api/time-off/create", makeHTTPHandleFunc(s.handleCreateTimeOff))
+	app.POST("/api/time-off/create", s.handleCreateTimeOff)
 
-	router.HandleFunc("/api/time-off", makeHTTPHandleFunc(s.handleGetTimeOffRequests))
+	app.GET("/api/time-off", s.handleGetTimeOffRequests)
 
-	router.HandleFunc("/api/account-time-off-relation/create", makeHTTPHandleFunc(s.handleCreateAccountsTimeOffRelationTable))
+	app.POST("/api/account-time-off-relation/create", s.handleCreateAccountsTimeOffRelationTable)
 
-	router.HandleFunc("/api/account-time-off-relation", makeHTTPHandleFunc(s.handleGetAccountsTimeOffRelationTable))
+	app.GET("/api/account-time-off-relation", s.handleGetAccountsTimeOffRelationTable)
 
-	router.HandleFunc("/api/departments/create", makeHTTPHandleFunc(s.handleCreateDepartments))
+	app.POST("/api/departments/create", s.handleCreateDepartments)
 
-	router.HandleFunc("/api/departments", s.withJWTAuth(makeHTTPHandleFunc(s.handleGetDepartments)))
+	app.GET("/api/departments", s.handleGetDepartments)
 
-	router.HandleFunc("/api/departments-accounts-relation", makeHTTPHandleFunc(s.handleGetDepartmentsAccountsRelation))
+	app.GET("/api/departments-accounts-relation", s.handleGetDepartmentsAccountsRelation)
 
-	router.HandleFunc("/api/login", makeHTTPHandleFunc(s.handleLogin))
+	app.POST("/api/login", s.handleLogin)
 
-	handler := cors.AllowAll().Handler(router)
+	fmt.Println("server running at http://localhost:3000/")
 
-	logger.Log(zap.InfoLevel, "server running at http://localhost:3000/")
-
-	http.ListenAndServe(s.listenAddr, handler)
+	app.Use(middleware.CORS())
+	// app.Use(echojwt.WithConfig(echojwt.Config{}))
+	app.Start(server.listenAddr)
 }
 
 // func that returns Encoded JSON data
@@ -76,22 +69,22 @@ type ApiError struct {
 }
 
 // function signature of the function that we are using for the MakeHTTPHandleFunc
-type apiFunc func(http.ResponseWriter, *http.Request) error
+// type apiFunc func(http.ResponseWriter, *http.Request) error
 
 // this function decorates our API func into an HTTP.HandlerFunc(ResponseWriter, Request)
-func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
-	// return a func that takes ResponseWriter, and Request that doesn't return anything and then it handles the Error from the API handler function
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := f(w, r); err != nil {
-			// handle error here
-			// encode the Error to JSON data
-			WriteJSON(w, http.StatusBadRequest, ApiError{Error: err.Error()})
-		}
-	}
-}
+// func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
+// 	// return a func that takes ResponseWriter, and Request that doesn't return anything and then it handles the Error from the API handler function
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		if err := f(w, r); err != nil {
+// 			// handle error here
+// 			// encode the Error to JSON data
+// 			WriteJSON(w, http.StatusBadRequest, ApiError{Error: err.Error()})
+// 		}
+// 	}
+// }
 
-func getIdParam(r *http.Request) (int, error) {
-	idStr := mux.Vars(r)["id"]
+func getIdParam(c echo.Context) (int, error) {
+	idStr := c.Param("id")
 
 	id, convertionErr := strconv.Atoi(idStr)
 

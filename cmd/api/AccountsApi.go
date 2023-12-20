@@ -5,20 +5,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pschlafley/trinityHR/types"
 )
 
-func (s *APIServer) handleGetAllAccounts(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetAllAccounts(c echo.Context) error {
 	employees, err := s.store.GetAllAccounts()
 	if err != nil {
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, employees)
+	return WriteJSON(c.Response().Writer, http.StatusOK, employees)
 }
 
-func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request) error {
-	id, err := getIdParam(r)
+func (s *APIServer) handleGetAccountById(c echo.Context) error {
+	id, err := getIdParam(c)
+
 	if err != nil {
 		return fmt.Errorf("invalid id given %d", id)
 	}
@@ -29,13 +31,13 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 		return getEmployeeErr
 	}
 
-	return WriteJSON(w, http.StatusOK, employee)
+	return WriteJSON(c.Response().Writer, http.StatusOK, employee)
 }
 
-func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleCreateAccount(c echo.Context) error {
 	var createEmployeeReq *types.CreateAccountRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&createEmployeeReq); err != nil {
+	if err := json.NewDecoder(c.Request().Body).Decode(&createEmployeeReq); err != nil {
 		return err
 	}
 
@@ -59,11 +61,11 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 		return relationErr
 	}
 
-	return WriteJSON(w, http.StatusOK, newEmployee)
+	return WriteJSON(c.Response().Writer, http.StatusOK, newEmployee)
 }
 
-func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
-	id, convErr := getIdParam(r)
+func (s *APIServer) handleDeleteAccount(c echo.Context) error {
+	id, convErr := getIdParam(c)
 
 	if convErr != nil {
 		return convErr
@@ -74,18 +76,18 @@ func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, map[string]int{"deleted": id})
+	return WriteJSON(c.Response().Writer, http.StatusOK, map[string]int{"deleted": id})
 }
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFeHBpcmVzQXQiOjE1MDAwLCJhY2NvdW50SUQiOjJ9.U9H4OLj__OhQh1m13fb_Z8jcIkOYZ-eEDo6FOQQspz4
-func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
-	if r.Method != "POST" {
-		return fmt.Errorf("method not allowed %s", r.Method)
+func (s *APIServer) handleLogin(c echo.Context) error {
+	if c.Request().Method != "POST" {
+		return fmt.Errorf("method not allowed %s", c.Request().Method)
 	}
 
 	var loginReq *types.AccountLoginReq
 
-	err := json.NewDecoder(r.Body).Decode(&loginReq)
+	err := json.NewDecoder(c.Request().Body).Decode(&loginReq)
 	if err != nil {
 		return err
 	}
@@ -110,5 +112,5 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		Token:     token,
 	}
 
-	return WriteJSON(w, http.StatusOK, resp)
+	return WriteJSON(c.Response().Writer, http.StatusOK, resp)
 }

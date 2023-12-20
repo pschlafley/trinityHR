@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pschlafley/trinityHR/types"
 )
 
@@ -22,12 +23,12 @@ func (s *APIServer) handleCreateDepartmentsAccountsRelation(department_id, accou
 	return newRelation, nil
 }
 
-func (s *APIServer) handleGetDepartmentsAccountsRelation(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetDepartmentsAccountsRelation(c echo.Context) error {
 	data, err := s.store.GetDepartmentsAccountsRelation()
 
 	if err != nil {
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, data)
+	return WriteJSON(c.Response().Writer, http.StatusOK, data)
 }

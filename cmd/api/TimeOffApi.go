@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pschlafley/trinityHR/types"
 )
 
-func (s *APIServer) handleCreateTimeOff(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleCreateTimeOff(c echo.Context) error {
 	timeOffRequest := &types.TimeOffRequest{}
 
-	if err := json.NewDecoder(r.Body).Decode(&timeOffRequest); err != nil {
+	if err := json.NewDecoder(c.Request().Body).Decode(&timeOffRequest); err != nil {
 		return fmt.Errorf("error decoding timeOffRequest body: %v", err)
 	}
 
@@ -25,15 +26,15 @@ func (s *APIServer) handleCreateTimeOff(w http.ResponseWriter, r *http.Request) 
 
 	newTimeOffRequest := timeOffReq.NewTimeOffRequest(timeOffID, *timeOffRequest)
 
-	return WriteJSON(w, http.StatusOK, newTimeOffRequest)
+	return WriteJSON(c.Response().Writer, http.StatusOK, newTimeOffRequest)
 }
 
-func (s *APIServer) handleGetTimeOffRequests(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetTimeOffRequests(c echo.Context) error {
 	requests, err := s.store.GetTimeOffRequests()
 
 	if err != nil {
 		return err
 	}
 
-	return WriteJSON(w, http.StatusOK, requests)
+	return WriteJSON(c.Response().Writer, http.StatusOK, requests)
 }

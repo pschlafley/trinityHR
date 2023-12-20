@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pschlafley/trinityHR/types"
 )
 
-func (s *APIServer) handleCreateAccountsTimeOffRelationTable(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleCreateAccountsTimeOffRelationTable(c echo.Context) error {
 	accountTimeOffRelationRequest := &types.AccountsTimeOffRelationRequest{}
 
-	if decodeErr := json.NewDecoder(r.Body).Decode(accountTimeOffRelationRequest); decodeErr != nil {
+	if decodeErr := json.NewDecoder(c.Request().Body).Decode(accountTimeOffRelationRequest); decodeErr != nil {
 		return decodeErr
 	}
 
@@ -24,15 +25,15 @@ func (s *APIServer) handleCreateAccountsTimeOffRelationTable(w http.ResponseWrit
 
 	request := accountTimeOffRelationTable.NewAccountsTimeOffRelationTable(id, accountTimeOffRelationRequest.AccountID, accountTimeOffRelationRequest.TimeOffID)
 
-	return WriteJSON(w, http.StatusOK, request)
+	return WriteJSON(c.Response().Writer, http.StatusOK, request)
 }
 
-func (s *APIServer) handleGetAccountsTimeOffRelationTable(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetAccountsTimeOffRelationTable(c echo.Context) error {
 	response, dbErr := s.store.GetAccountsTimeOffRelations()
 
 	if dbErr != nil {
 		return dbErr
 	}
 
-	return WriteJSON(w, http.StatusOK, response)
+	return WriteJSON(c.Response().Writer, http.StatusOK, response)
 }
