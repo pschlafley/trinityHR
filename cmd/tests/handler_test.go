@@ -32,13 +32,19 @@ type (
 // 	return c.JSON(http.StatusCreated, u)
 // }
 
-func (h *handler) getAccount(c echo.Context) error {
+func (h *handler) handleGetAccountById(c echo.Context) error {
 	id := c.Param("id")
+
 	user := h.db[id]
 	if user == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "account not found")
 	}
 	return c.JSON(http.StatusOK, user)
+	// employee, getEmployeeErr := s.store.GetAccountByID(id)
+
+	// if getEmployeeErr != nil {
+	// 	return getEmployeeErr
+	// }
 }
 
 var (
@@ -59,7 +65,7 @@ func TestGetUser(t *testing.T) {
 	h := &handler{mockDB}
 
 	// Assertions
-	if assert.NoError(t, h.getAccount(c)) {
+	if assert.NoError(t, h.handleGetAccountById(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, userJSON, rec.Body.String())
 	}

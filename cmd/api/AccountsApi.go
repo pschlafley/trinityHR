@@ -11,27 +11,28 @@ import (
 
 func (s *APIServer) handleGetAllAccounts(c echo.Context) error {
 	employees, err := s.store.GetAllAccounts()
+
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, "internal server error")
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, employees)
+	return c.JSON(http.StatusOK, employees)
 }
 
 func (s *APIServer) handleGetAccountById(c echo.Context) error {
 	id, err := getIdParam(c)
 
 	if err != nil {
-		return fmt.Errorf("invalid id given %d", id)
+		return err
 	}
 
-	employee, getEmployeeErr := s.store.GetAccountByID(id)
+	account, err := s.store.GetAccountByID(id)
 
-	if getEmployeeErr != nil {
-		return getEmployeeErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "account not found")
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, employee)
+	return c.JSON(http.StatusOK, account)
 }
 
 func (s *APIServer) handleCreateAccount(c echo.Context) error {
@@ -61,7 +62,7 @@ func (s *APIServer) handleCreateAccount(c echo.Context) error {
 		return relationErr
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, newEmployee)
+	return c.JSON(http.StatusOK, newEmployee)
 }
 
 func (s *APIServer) handleDeleteAccount(c echo.Context) error {
@@ -76,7 +77,7 @@ func (s *APIServer) handleDeleteAccount(c echo.Context) error {
 		return err
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, map[string]int{"deleted": id})
+	return c.JSON(http.StatusOK, map[string]int{"deleted": id})
 }
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJFeHBpcmVzQXQiOjE1MDAwLCJhY2NvdW50SUQiOjJ9.U9H4OLj__OhQh1m13fb_Z8jcIkOYZ-eEDo6FOQQspz4
@@ -88,6 +89,7 @@ func (s *APIServer) handleLogin(c echo.Context) error {
 	var loginReq *types.AccountLoginReq
 
 	err := json.NewDecoder(c.Request().Body).Decode(&loginReq)
+
 	if err != nil {
 		return err
 	}
@@ -103,6 +105,7 @@ func (s *APIServer) handleLogin(c echo.Context) error {
 	}
 
 	token, err := createJWT(account)
+
 	if err != nil {
 		return err
 	}
@@ -112,5 +115,5 @@ func (s *APIServer) handleLogin(c echo.Context) error {
 		Token:     token,
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, resp)
+	return c.JSON(http.StatusOK, resp)
 }

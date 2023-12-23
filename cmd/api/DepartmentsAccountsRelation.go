@@ -30,5 +30,5 @@ func (s *APIServer) handleGetDepartmentsAccountsRelation(c echo.Context) error {
 		return err
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, data)
+	return c.JSON(http.StatusOK, data)
 }

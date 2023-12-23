@@ -16,8 +16,8 @@ import (
 type Storage interface {
 	CreateAccount(*types.CreateAccountRequest) (int, error)
 	DeleteAccount(int) error
-	GetAccountByID(int) (*types.AccountsDepartmentsRelationData, error)
-	GetAllAccounts() ([]*types.AccountsDepartmentsRelationData, error)
+	GetAccountByID(int) (*types.Account, error)
+	GetAllAccounts() ([]*types.Account, error)
 	CreateTimeOffRequest(*types.TimeOffRequest) (int, error)
 	GetTimeOffRequests() ([]*types.TimeOff, error)
 	CreateAccountsTimeOffRelationTableRow(*types.AccountsTimeOffRelationRequest) (int, error)

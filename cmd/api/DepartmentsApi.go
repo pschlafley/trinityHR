@@ -23,7 +23,7 @@ func (s *APIServer) handleCreateDepartments(c echo.Context) error {
 
 	newDepartment := dept.NewDepartment(request, id)
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, newDepartment)
+	return c.JSON(http.StatusOK, newDepartment)
 }
 
 func (s *APIServer) handleGetDepartments(c echo.Context) error {
@@ -32,5 +32,5 @@ func (s *APIServer) handleGetDepartments(c echo.Context) error {
 		return err
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, departments)
+	return c.JSON(http.StatusOK, departments)
 }

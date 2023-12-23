@@ -26,7 +26,7 @@ func (s *APIServer) handleCreateTimeOff(c echo.Context) error {
 
 	newTimeOffRequest := timeOffReq.NewTimeOffRequest(timeOffID, *timeOffRequest)
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, newTimeOffRequest)
+	return c.JSON(http.StatusOK, newTimeOffRequest)
 }
 
 func (s *APIServer) handleGetTimeOffRequests(c echo.Context) error {
@@ -36,5 +36,5 @@ func (s *APIServer) handleGetTimeOffRequests(c echo.Context) error {
 		return err
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, requests)
+	return c.JSON(http.StatusOK, requests)
 }

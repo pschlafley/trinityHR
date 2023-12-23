@@ -25,7 +25,7 @@ func (s *APIServer) handleCreateAccountsTimeOffRelationTable(c echo.Context) err
 
 	request := accountTimeOffRelationTable.NewAccountsTimeOffRelationTable(id, accountTimeOffRelationRequest.AccountID, accountTimeOffRelationRequest.TimeOffID)
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, request)
+	return c.JSON(http.StatusOK, request)
 }
 
 func (s *APIServer) handleGetAccountsTimeOffRelationTable(c echo.Context) error {
@@ -35,5 +35,5 @@ func (s *APIServer) handleGetAccountsTimeOffRelationTable(c echo.Context) error 
 		return dbErr
 	}
 
-	return WriteJSON(c.Response().Writer, http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }

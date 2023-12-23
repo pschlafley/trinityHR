@@ -1,35 +1,36 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gofor-little/env"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/labstack/echo/v4"
 	"github.com/pschlafley/trinityHR/types"
 )
 
 type JwtCustomClaims struct {
-	Name  string `json:"name"`
-	Admin string `json:"admin"`
+	AccountID   int    `json:"account_id"`
+	AccountType string `json:"account_type"`
 	jwt.RegisteredClaims
 }
 
-func createJWT(account *types.Account) (string, error) {
-	registeredClaims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		NotBefore: jwt.NewNumericDate(time.Now()),
-		Issuer:    "test",
-		ID:        "1",
-		Audience:  []string{"somebody_else"},
-	}
+var registeredClaims jwt.RegisteredClaims = jwt.RegisteredClaims{
+	ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+	IssuedAt:  jwt.NewNumericDate(time.Now()),
+	NotBefore: jwt.NewNumericDate(time.Now()),
+}
 
-	name := account.FullName
-	admin := account.AccountType
+func createJWT(account *types.Account) (string, error) {
+
+	accountId := account.AccountID
+	accountType := account.AccountType
 
 	claims := &JwtCustomClaims{
-		name,
-		admin,
+		accountId,
+		accountType,
 		registeredClaims,
 	}
 
@@ -40,62 +41,72 @@ func createJWT(account *types.Account) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// func validateJWT(tokenString string) (*jwt.Token, error) {
-// 	var secret = env.Get("AuthSecret", "")
+// func setTokenCookie(name, token string, expiration time.Time, c echo.Context) {
+// 	cookie := new(http.Cookie)
+// 	cookie.Name = name
+// 	cookie.Value = token
+// 	cookie.Expires = expiration
+// 	cookie.Path = "/"
+// 	cookie.HttpOnly = true
 
-// 	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-// 		// Don't forget to validate the alg is what you expect:
-// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-// 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-// 		}
-
-// 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-// 		return []byte(secret), nil
-// 	})
+// 	c.SetCookie(cookie)
 // }
 
-// func permissionDenied(w http.ResponseWriter) {
-// 	WriteJSON(w, http.StatusForbidden, ApiError{Error: "permission denied"})
-// }
+func validateJWT(tokenString string) (*jwt.Token, error) {
+	var secret = env.Get("AuthSecret", "")
 
-// func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		tokenString := r.Header.Get("x-jwt-token")
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 
-// 		token, err := validateJWT(tokenString)
+		return []byte(secret), nil
+	})
+}
 
-// 		if err != nil {
-// 			permissionDenied(w)
-// 			return
-// 		}
+func permissionDenied(c echo.Context) {
+	c.JSON(http.StatusForbidden, ApiError{Error: "permission denied"})
+}
 
-// 		if !token.Valid {
-// 			permissionDenied(w)
-// 			return
-// 		}
+func (s *APIServer) withJWTAuth(handlerFunc echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		tokenString := c.Request().Header.Get("x-jwt-token")
 
-// 		claims := token.Claims.(jwt.MapClaims)
+		token, err := validateJWT(tokenString)
 
-// 		var userReqID float64 = claims["accountID"].(float64)
+		if err != nil {
+			permissionDenied(c)
+			return err
+		}
 
-// 		if userReqID == 0 {
-// 			permissionDenied(w)
-// 			return
-// 		}
+		if !token.Valid {
+			permissionDenied(c)
+			return err
+		}
 
-// 		account, err := s.store.GetAccountByJWT(token)
+		claims := token.Claims.(jwt.MapClaims)
 
-// 		if err != nil {
-// 			permissionDenied(w)
-// 			return
-// 		}
+		var userReqID float64 = claims["account_id"].(float64)
 
-// 		if userReqID != float64(account.AccountID) {
-// 			permissionDenied(w)
-// 			return
-// 		}
+		if userReqID == 0 {
+			permissionDenied(c)
+			return err
+		}
 
-// 		handlerFunc(w, r)
+		account, err := s.store.GetAccountByJWT(token)
 
-// 	}
-// }
+		if err != nil {
+			permissionDenied(c)
+			return err
+		}
+
+		if userReqID != float64(account.AccountID) {
+			permissionDenied(c)
+			return err
+		}
+
+		return handlerFunc(c)
+
+	}
+}

@@ -1,9 +1,7 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -25,12 +23,19 @@ func NewAPIServer(listenAddr string, store db.Storage) *APIServer {
 }
 
 func (s *APIServer) Run(app *echo.Echo, server *APIServer) {
+
+	// Middleware
+	app.Use(middleware.CORS())
+	// app.Use(middleware.CSRF())
+
+	app.Use(middleware.Logger())
+
 	// API Routes
 	app.POST("/api/accounts/create", s.handleCreateAccount)
 
-	app.GET("/api/accounts/:id", s.handleGetAccountById)
+	app.GET("/api/accounts/:id", s.withJWTAuth(s.handleGetAccountById))
 
-	app.GET("/api/accounts", s.handleGetAllAccounts)
+	app.GET("/api/accounts", s.withJWTAuth(s.handleGetAllAccounts))
 
 	app.PUT("/api/accounts/delete/:id", s.handleDeleteAccount)
 
@@ -48,21 +53,19 @@ func (s *APIServer) Run(app *echo.Echo, server *APIServer) {
 
 	app.GET("/api/departments-accounts-relation", s.handleGetDepartmentsAccountsRelation)
 
-	app.POST("/api/login", s.handleLogin)
+	app.POST("/login", s.handleLogin)
 
 	fmt.Println("server running at http://localhost:3000/")
 
-	app.Use(middleware.CORS())
-	// app.Use(echojwt.WithConfig(echojwt.Config{}))
 	app.Start(server.listenAddr)
 }
 
 // func that returns Encoded JSON data
-func WriteJSON(w http.ResponseWriter, status int, value any) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	return json.NewEncoder(w).Encode(value)
-}
+// func WriteJSON(w http.ResponseWriter, status int, value any) error {
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(status)
+// 	return json.NewEncoder(w).Encode(value)
+// }
 
 type ApiError struct {
 	Error string `json:"error"`
@@ -87,6 +90,8 @@ func getIdParam(c echo.Context) (int, error) {
 	idStr := c.Param("id")
 
 	id, convertionErr := strconv.Atoi(idStr)
+
+	fmt.Print(id)
 
 	if convertionErr != nil {
 		return 0, fmt.Errorf("invalid id given %s", idStr)

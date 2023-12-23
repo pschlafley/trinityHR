@@ -60,18 +60,18 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 	return nil
 }
 
-func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationData, error) {
-	query := `SELECT account_id, account_type, role, full_name, email, accounts.department_id, department_name FROM accounts JOIN departments on accounts.department_id = departments.department_id ORDER BY account_id ASC`
+func (s *PostgresStore) GetAllAccounts() ([]*types.Account, error) {
+	query := `SELECT account_id, account_type, role, full_name, email, created_at, department_id FROM accounts ORDER BY account_id ASC`
 
 	rows, err := s.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching getAllAccounts: %d", err)
 	}
 
-	var accounts []*types.AccountsDepartmentsRelationData
+	var accounts []*types.Account
 
 	for rows.Next() {
-		account, err := scanIntoAccountDepartmentsRelationData(rows)
+		account, err := scanIntoAccount(rows)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning into accounts: %d", err)
 		}
@@ -86,23 +86,24 @@ func (s *PostgresStore) GetAllAccounts() ([]*types.AccountsDepartmentsRelationDa
 	return accounts, nil
 }
 
-func (s *PostgresStore) GetAccountByID(id int) (*types.AccountsDepartmentsRelationData, error) {
-	query := "SELECT account_id, account_type, role, full_name, email, accounts.department_id, department_name FROM accounts JOIN departments on accounts.department_id = departments.department_id WHERE account_id=$1"
+func (s *PostgresStore) GetAccountByID(id int) (*types.Account, error) {
+	query := "SELECT account_id, account_type, role, full_name, email, created_at, department_id FROM accounts WHERE account_id = $1"
 
 	rows, err := s.db.Query(query, id)
+
 	if err != nil {
 		return nil, fmt.Errorf("error fetching getAccountById: %d", err)
 	}
 
 	for rows.Next() {
-		return scanIntoAccountDepartmentsRelationData(rows)
+		return scanIntoAccount(rows)
 	}
 
 	return nil, fmt.Errorf("account %d not found", id)
 }
 
 func (s *PostgresStore) GetAccountByEmail(email string) (*types.Account, error) {
-	query := "SELECT account_id, password FROM accounts WHERE email = $1"
+	query := "SELECT account_id, account_type, password FROM accounts WHERE email = $1"
 	rows, err := s.db.Query(query, email)
 	if err != nil {
 		return nil, err
@@ -119,7 +120,7 @@ func (s *PostgresStore) GetAccountByJWT(token *jwt.Token) (*types.Account, error
 	tokenID := token.Claims.(jwt.MapClaims)
 	query := `SELECT account_id, account_type, role, full_name, email, created_at, department_id FROM accounts WHERE account_id = $1`
 
-	rows, err := s.db.Query(query, tokenID["accountID"])
+	rows, err := s.db.Query(query, tokenID["account_id"])
 	if err != nil {
 		return nil, err
 	}
@@ -143,6 +144,7 @@ func getAccountByEmailScan(rows *sql.Rows) (*types.Account, error) {
 
 	err := rows.Scan(
 		&employee.AccountID,
+		&employee.AccountType,
 		&employee.Password,
 	)
 

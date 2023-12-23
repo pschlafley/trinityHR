@@ -1,5 +1,18 @@
-package main
+package views
 
-templ hello(name string) {
-	<div>Hello, { name }</div>
+import "github.com/pschlafley/trinityHR/types"
+
+templ AllAccountsView(acct []*types.Account) {
+	<body>
+		<div>
+			for _, a := range acct {
+				<h3>
+					{ a.FullName }
+				</h3>	
+				<p>
+					{ a.Email }
+				</p>
+			} 
+		</div>
+	</body>
 }
